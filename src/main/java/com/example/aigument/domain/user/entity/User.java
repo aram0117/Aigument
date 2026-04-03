@@ -1,0 +1,61 @@
+package com.example.aigument.domain.user.entity;
+
+import com.example.aigument.common.annotation.EnumValidAnnotation;
+import com.example.aigument.common.enums.UserRole;
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Getter
+@Table(name = "users")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "nick_name", nullable = false, length = 30, unique = true)
+    private String nickName;
+
+    @Column(name = "email", nullable = false, length = 50, unique = true)
+    private String email;
+
+    @Column(name = "password", length = 100)
+    private String password;
+
+    @Column(name = "phone_number", length = 15)
+    private String phoneNumber;
+
+    @Column(name = "provider", length = 10)
+    private String provider;
+
+    @Column(name = "provider_id", unique = true)
+    private String providerId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false, length = 10)
+    @EnumValidAnnotation
+    private UserRole role;
+
+    @Builder
+    public User(String nickName, String email, String password, String phoneNumber, String provider, String providerId, UserRole role) {
+        this.nickName = nickName;
+        this.email = email;
+        this.password = password;
+        this.phoneNumber = phoneNumber;
+        this.provider = provider;
+        this.providerId = providerId;
+        this.role = role;
+    }
+
+    public User updateSocialInfo(String nickName, String email) {
+        this.nickName = nickName;
+        this.email = email;
+
+        return this;
+    }
+}
