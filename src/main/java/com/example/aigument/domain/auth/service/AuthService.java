@@ -37,7 +37,14 @@ public class AuthService {
         // 중복 검증
         duplicationCheck(request.getNickName(), request.getEmail());
 
-        User newUser = new User(request.getNickName(), request.getEmail(), passwordEncoder.encode(request.getPassword()), request.getPhoneNumber(), "LOCAL", null, USER);
+        User newUser = User.builder()
+                .nickName(request.getNickName())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .phoneNumber(request.getPhoneNumber())
+                .provider("LOCAL")
+                .role(USER)
+                .build();
 
         // 사용자 생성
         userRepository.save(newUser);

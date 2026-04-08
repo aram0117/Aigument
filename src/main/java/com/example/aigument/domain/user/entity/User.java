@@ -41,8 +41,12 @@ public class User {
     @EnumValidAnnotation
     private UserRole role;
 
+    // 회원가입, 탈퇴 시 저장과 삭제 전파
+    @OneToOne(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
+    private UserStats userStats;
+
     @Builder
-    public User(String nickName, String email, String password, String phoneNumber, String provider, String providerId, UserRole role) {
+    public User(String nickName, String email, String password, String phoneNumber, String provider, String providerId, UserRole role,  UserStats userStats) {
         this.nickName = nickName;
         this.email = email;
         this.password = password;
@@ -50,6 +54,7 @@ public class User {
         this.provider = provider;
         this.providerId = providerId;
         this.role = role;
+        this.userStats = new UserStats(this);
     }
 
     public User updateSocialInfo(String nickName, String email) {
