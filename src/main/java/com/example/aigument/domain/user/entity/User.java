@@ -18,7 +18,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "nick_name", nullable = false, length = 30, unique = true)
+    @Column(name = "nickname", nullable = false, length = 30, unique = true)
     private String nickName;
 
     @Column(name = "email", nullable = false, length = 50, unique = true)
@@ -42,7 +42,8 @@ public class User {
     private UserRole role;
 
     // 회원가입, 탈퇴 시 저장과 삭제 전파
-    @OneToOne(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
+    @OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
+    @JoinColumn(name = "user_stats_id")
     private UserStats userStats;
 
     @Builder
