@@ -33,12 +33,12 @@ public class ChatRoom {
     @Column(name = "content")
     private String content;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "host_id", nullable = false, unique = true)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "host_id", nullable = false)
     private User host;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "guest_id", unique = true)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "guest_id")
     private User guest;
 
     public ChatRoom(String title, CategoryType category, String content, User host, User guest) {
