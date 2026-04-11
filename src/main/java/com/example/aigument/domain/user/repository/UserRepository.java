@@ -1,4 +1,4 @@
-package com.example.aigument.domain.user.repoistory;
+package com.example.aigument.domain.user.repository;
 
 import com.example.aigument.domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;

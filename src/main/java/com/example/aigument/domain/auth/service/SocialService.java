@@ -2,7 +2,7 @@ package com.example.aigument.domain.auth.service;
 
 import com.example.aigument.domain.auth.dto.SocialUserDto;
 import com.example.aigument.domain.user.entity.User;
-import com.example.aigument.domain.user.repoistory.UserRepository;
+import com.example.aigument.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

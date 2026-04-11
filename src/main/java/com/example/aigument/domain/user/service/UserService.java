@@ -3,7 +3,7 @@ package com.example.aigument.domain.user.service;
 import com.example.aigument.common.exception.CustomException;
 import com.example.aigument.domain.user.entity.User;
 import com.example.aigument.domain.user.dto.response.GetUserResponse;
-import com.example.aigument.domain.user.repoistory.UserRepository;
+import com.example.aigument.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

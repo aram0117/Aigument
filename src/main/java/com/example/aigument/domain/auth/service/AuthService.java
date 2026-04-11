@@ -8,7 +8,7 @@ import com.example.aigument.domain.auth.dto.request.SignupRequest;
 import com.example.aigument.domain.auth.dto.response.TokenResponse;
 import com.example.aigument.domain.auth.dto.response.SignupResponse;
 import com.example.aigument.domain.user.entity.User;
-import com.example.aigument.domain.user.repoistory.UserRepository;
+import com.example.aigument.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
