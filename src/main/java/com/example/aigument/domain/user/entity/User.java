@@ -1,6 +1,6 @@
 package com.example.aigument.domain.user.entity;
 
-import com.example.aigument.common.annotation.EnumValidAnnotation;
+import com.example.aigument.common.enums.annotation.UserRoleValidAnnotation;
 import com.example.aigument.common.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -38,7 +38,7 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, length = 10)
-    @EnumValidAnnotation
+    @UserRoleValidAnnotation
     private UserRole role;
 
     // 회원가입, 탈퇴 시 저장과 삭제 전파

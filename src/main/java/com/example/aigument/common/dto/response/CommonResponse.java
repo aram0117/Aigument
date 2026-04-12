@@ -1,4 +1,4 @@
-package com.example.aigument.common.response;
+package com.example.aigument.common.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;

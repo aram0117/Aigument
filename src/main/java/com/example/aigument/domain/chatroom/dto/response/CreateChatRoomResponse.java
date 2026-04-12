@@ -2,7 +2,6 @@ package com.example.aigument.domain.chatroom.dto.response;
 
 import com.example.aigument.common.enums.CategoryType;
 import com.example.aigument.domain.chatroom.entity.ChatRoom;
-import com.example.aigument.domain.user.entity.User;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

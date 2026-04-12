@@ -1,6 +1,6 @@
 package com.example.aigument.domain.chatroom.entity;
 
-import com.example.aigument.common.annotation.EnumValidAnnotation;
+import com.example.aigument.common.enums.annotation.UserRoleValidAnnotation;
 import com.example.aigument.common.enums.CategoryType;
 import com.example.aigument.domain.user.entity.User;
 import jakarta.persistence.Entity;
@@ -27,7 +27,7 @@ public class ChatRoom {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "category", nullable = false)
-    @EnumValidAnnotation
+    @UserRoleValidAnnotation
     private CategoryType category;
 
     @Column(name = "content")
