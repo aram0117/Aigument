@@ -1,11 +1,11 @@
-package com.example.aigument.common.valid;
+package com.example.aigument.common.enums.valid;
 
-import com.example.aigument.common.annotation.EnumValidAnnotation;
+import com.example.aigument.common.enums.annotation.UserRoleValidAnnotation;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-public class EnumValidator implements ConstraintValidator<EnumValidAnnotation, Object> {
+public class UserRoleValidator implements ConstraintValidator<UserRoleValidAnnotation, Object> {
 
     @Override
     public boolean isValid(Object value, ConstraintValidatorContext context) {

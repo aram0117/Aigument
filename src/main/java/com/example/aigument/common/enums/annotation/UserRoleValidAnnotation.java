@@ -1,6 +1,6 @@
-package com.example.aigument.common.annotation;
+package com.example.aigument.common.enums.annotation;
 
-import com.example.aigument.common.valid.EnumValidator;
+import com.example.aigument.common.enums.valid.UserRoleValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
@@ -11,8 +11,8 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = EnumValidator.class)
-public @interface EnumValidAnnotation {
+@Constraint(validatedBy = UserRoleValidator.class)
+public @interface UserRoleValidAnnotation {
 
     String message() default "허용되지 않은 권한입니다.";
 
