@@ -7,8 +7,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum ExpirationTime {
 
-    ACCESS_TOKEN_EXPIRATION_TIME(60 * 30), // 30분
-    REFRESH_TOKEN_EXPIRATION_TIME(60 * 60 * 24 * 14); // 2주
+    ACCESS_TOKEN_EXPIRATION_TIME(60 * 30 * 1000L), // 30분
+    REFRESH_TOKEN_EXPIRATION_TIME(60 * 60 * 24 * 14 * 1000L); // 2주
 
     private final long expirationTime;
 }
