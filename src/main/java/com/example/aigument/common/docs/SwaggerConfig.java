@@ -6,11 +6,20 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
+import org.springdoc.core.utils.SpringDocUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class SwaggerConfig {
+
+    static {
+        // 방법 A: @AuthenticationPrincipal 어노테이션 자체를 무시하도록 설정
+        SpringDocUtils.getConfig().addAnnotationsToIgnore(org.springframework.security.core.annotation.AuthenticationPrincipal.class);
+
+        // 방법 B: 특정 커스텀 유저 클래스를 무시하도록 설정 (AuthUser 자리에 본인 클래스명 입력)
+        // SpringDocUtils.getConfig().addRequestWrapperToIgnore(AuthUser.class);
+    }
 
     @Bean
     public OpenAPI openAPI() {
