@@ -1,7 +1,8 @@
-package com.example.aigument.common.exception;
+package com.example.aigument.common.exception.handler;
 
-import com.example.aigument.common.enums.ExceptionCode;
-import com.example.aigument.common.response.CommonResponse;
+import com.example.aigument.common.dto.response.CommonResponse;
+import com.example.aigument.common.exception.CustomException;
+import com.example.aigument.common.exception.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,12 +18,12 @@ public class GlobalExceptionHandler {
     // 커스텀 예외 처리
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<CommonResponse<Void>> customException(CustomException e) {
-        ExceptionCode exceptionCode = e.getExceptionCode();
+        ErrorCode errorCode = e.getErrorCode();
 
         // 정적 메서드 success/error를 제네릭하게 호출
         return ResponseEntity
-                .status(exceptionCode.getStatus())
-                .body(CommonResponse.error(exceptionCode.getMessage()));
+                .status(errorCode.getStatus())
+                .body(CommonResponse.error(errorCode.getMessage()));
     }
 
     // @Valid 검증 예외 처리
