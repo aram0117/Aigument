@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @Getter
 @RequiredArgsConstructor
-public class GetChatRoomResponse {
+public class GetAllChatRoomResponse {
 
     private final Long id;
     private final String title;
@@ -19,9 +19,9 @@ public class GetChatRoomResponse {
     private final Long hostId;
     private final Long guestId;
 
-    public static GetChatRoomResponse from(ChatRoom chatRoom) {
+    public static GetAllChatRoomResponse from(ChatRoom chatRoom) {
 
-        return new GetChatRoomResponse(
+        return new GetAllChatRoomResponse(
                 chatRoom.getId(),
                 chatRoom.getTitle(),
                 chatRoom.getCategory(),
@@ -29,7 +29,7 @@ public class GetChatRoomResponse {
                 chatRoom.getHost().getId(),
                 Optional.ofNullable(chatRoom.getGuest())
                         .map(User::getId)
-                        .orElse(0L)  // 게스트가 null 일 때 0응답 -> 프론트에서 "대기중" 으로 변경
+                        .orElse(0L) // 게스트가 null 일 때 0응답 -> 프론트에서 "대기중" 으로 변경
         );
     }
 }

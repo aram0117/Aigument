@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -15,5 +16,10 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
     @EntityGraph(attributePaths = {"host", "guest"})
     Optional<ChatRoom> findById(Long id);
 
+    @EntityGraph(attributePaths = {"host", "guest"})
+    List<ChatRoom> findAll();
+
     boolean existsByHost(User host);
+
+    void deleteByGuest(User guest);
 }
