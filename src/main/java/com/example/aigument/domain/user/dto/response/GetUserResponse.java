@@ -11,7 +11,6 @@ public class GetUserResponse {
     private final Long id;
     private final String nickName;
     private final String email;
-    private final String password;
     private final String phoneNumber;
 
     public static GetUserResponse from(User user) {
@@ -19,7 +18,6 @@ public class GetUserResponse {
                 user.getId(),
                 user.getNickName(),
                 user.getEmail(),
-                user.getPassword(),
                 user.getPhoneNumber()
         );
     }
