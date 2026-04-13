@@ -1,6 +1,6 @@
 package com.example.aigument.domain.auth.service;
 
-import com.example.aigument.domain.auth.dto.SocialUserDto;
+import com.example.aigument.domain.auth.dto.SocialUser;
 import com.example.aigument.domain.user.entity.User;
 import com.example.aigument.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,18 +17,18 @@ public class SocialService {
 
 
     @Transactional
-    public User getSocialUser(SocialUserDto signupDto) {
+    public User getSocialUser(SocialUser socialUser) {
 
         // 소셜 유저가 db에 존재하면 최신화, 존재하지 않으면 소셜 회원가입
-        return userRepository.findByProviderId(signupDto.getProviderId())
-                .map(existingUser -> existingUser.updateSocialInfo(signupDto.getUsername(), signupDto.getEmail()))
+        return userRepository.findByProviderId(socialUser.getProviderId())
+                .map(existingUser -> existingUser.updateSocialInfo(socialUser.getUsername(), socialUser.getEmail()))
                 .orElseGet(() -> userRepository.save(
                                 User.builder()
-                                        .nickName(signupDto.getUsername())
-                                        .email(signupDto.getEmail())
+                                        .nickName(socialUser.getUsername())
+                                        .email(socialUser.getEmail())
                                         .role(USER)
-                                        .providerId(signupDto.getProviderId())
-                                        .provider(signupDto.getProvider())
+                                        .providerId(socialUser.getProviderId())
+                                        .provider(socialUser.getProvider())
                                         .build()
                         )
                 );

@@ -3,7 +3,7 @@ package com.example.aigument.common.security.oauth2.handler;
 import com.example.aigument.common.security.oauth2.repository.HttpCookieOAuth2AuthorizationRequestRepository;
 import com.example.aigument.common.security.provider.JwtProvider;
 import com.example.aigument.common.security.provider.RefreshTokenCookie;
-import com.example.aigument.domain.auth.dto.SocialUserDto;
+import com.example.aigument.domain.auth.dto.SocialUser;
 import com.example.aigument.domain.auth.service.SocialService;
 import com.example.aigument.domain.user.entity.User;
 import jakarta.servlet.http.HttpServletRequest;
@@ -49,9 +49,9 @@ public abstract class AbstractSocialLoginJwtGrantSuccessHandler extends SimpleUr
         String providerId = extractProviderId(oAuth2User);
         String provider = authToken.getAuthorizedClientRegistrationId();
 
-        SocialUserDto socialUserDto = new SocialUserDto(username, email, provider, providerId);
+        SocialUser socialUser = new SocialUser(username, email, provider, providerId);
 
-        User foundSocialUser= socialService.getSocialUser(socialUserDto);
+        User foundSocialUser= socialService.getSocialUser(socialUser);
 
         // 소셜 유저 정보로 jwt 토큰 발급
         String accessToken = jwtProvider.generateToken(foundSocialUser.getId(), foundSocialUser.getNickName(), foundSocialUser.getEmail(), foundSocialUser.getRole(), ACCESS_TOKEN_EXPIRATION_TIME.getExpirationTime());
