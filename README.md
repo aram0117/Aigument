@@ -63,7 +63,7 @@
 > *v2 브랜치 작업 완료 후 업데이트 예정*
 <br>
 
-## 🏗️ 와이어 프레임
+## 🔳 와이어 프레임
 <img width="3324" height="1729" alt="와이어 프레임" src="https://github.com/user-attachments/assets/a22d82bc-2a20-4be8-bd2e-bef6496f677b" />
 <br>
 
