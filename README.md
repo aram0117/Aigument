@@ -1,77 +1,69 @@
 # 🚀 Aigument
 
-<img width="1024" height="572" alt="image" src="https://github.com/user-attachments/assets/cd11963a-5670-4f84-bab0-1fc0646154ea" />
+<img src="https://github.com/user-attachments/assets/cd11963a-5670-4f84-bab0-1fc0646154ea" width="100%" alt="Aigument Main Banner" />
 
-> AI 와 Argument(인수, 전달인자)의 합성어로 유저 간 채팅 시스템을 통해 대화 내용을 AI에게 전달하여 승패를 나누는 토론 기반 플랫폼입니다.
-
-
-
+> **AI + Argument (인수, 전달인자)**
+> 유저 간 채팅 내용을 AI에게 전달하여 논리적 근거를 바탕으로 승패를 나누는 **토론 기반 분석 플랫폼**입니다.
 <br>
+
 ## 📖 프로젝트 소개
-Websocket 과 Stomp 규격을 사용하여 양방향 소통이 가능한 채팅 시스템을 구축하였고
-Redis를 활용하여 토론 내용을 수집해 분석하기 요청 시 AI로 전달 한 뒤 승패를 나누는 구조입니다.
-
-
-
+**Aigument**는 단순한 채팅을 넘어, 대화의 맥락을 데이터화하고 AI 모델이 이를 분석하여 승자를 판정하는 혁신적인 토론 환경을 제공합니다.
 <br>
-## ✨ 주요 기능
 
-# v1 - mvp
-* **기능 1:** 회원가입, 로그인을 통한 인증/인가와 Oauth2를 도입한 소셜로그인 기능
-* **기능 2:** 유저 관련 api (조회, 정보 수정, 승패 전적 추가)
-* **기능 3:** 채팅방 api (생성, 상세 조회, 목록 조회, 입장, 퇴장)
-* **기능 4:** 메시지 브로커(RTopic)와 Websocket을 활용한 이벤트 및 채팅 전송 기능
-* **기능 5:** OpenAI를 활용한 토론 분석 기능
-
-# v2 - 성능 개선 및 고도화
-*2026/05 ~ 중 작업 예정* 
-
-# v3 - 기능별 단위, 통합 테스트 코드 추가 (커버리지 단위당 70% 달성) 
-*2026/06 ~ 중 작업 예정* 
-
-# v4 - 부가 기능 추가
-*추후에 작업 예정*
-
-
-
+* **실시간 양방향 소통**: WebSocket 및 STOMP 프로토콜을 활용한 저지연 채팅 시스템
+* **데이터 파이프라인**: Redis를 메시지 브로커로 활용해 채팅 내용을 수집하고 AI 분석 엔진(Ollama)으로 전달
 <br>
+
 ## 🛠 기술 스택 (Tech Stack)
 
-### **Backend**
-* Java 17
-* Spring Boot 3.4.0
-* Spring Security / JWT / Oauth2 / Spring Data JPA
-* MySQL / Redis
-
-### **Infrastructure & DevOps**
-* AWS (EC2)
-* Docker / Nginx
-* GitHub Actions (CI/CD)
-* AI (Oliama)
-* Websocket / Stomp
-
-### **Tools & Collaboration**
-* Git / GitHub
-* Notion
-* Swagger (API Docs)
-
-
-
-
+### **Backend & Security**
+* **Language**: Java 17
+* **Framework**: Spring Boot 3.4.0
+* **Security**: Spring Security, JWT, OAuth2 (Social Login)
+* **Persistence**: Spring Data JPA (MySQL), Redis (RTopic, Pub/Sub)
 <br>
+
+### **Infrastructure & AI**
+* **Cloud**: AWS EC2
+* **Container**: Docker, Nginx (Reverse Proxy)
+* **CI/CD**: GitHub Actions
+* **AI Engine**: Ollama (LLM Integration)
+<br>
+
+### **Tools**
+* Git / GitHub, Notion, Swagger (OpenAPI 3.0)
+<br>
+
+## ✨ 주요 기능 및 로드맵
+
+### **✅ v1 - MVP (Completed)**
+* **인증 및 인가**: JWT 기반 자체 로그인 및 OAuth2 소셜 로그인 연동
+* **커뮤니티**: 채팅방 생성, 목록 조회 및 실시간 입장/퇴장 시스템
+* **메시징**: Redis RTopic 기반의 분산 메시지 브로커 환경 구축
+* **AI 토론 분석**: OpenAI 및 Ollama 연동을 통한 실시간 승패 판정 로직
+<br>
+
+### **📅 v2 - Performance (2026.05 예정)**
+* Redis 분산 락을 이용한 동시성 제어 및 서버 성능 고도화
+* 시스템 아키텍처 고도화 및 최적화
+<br>
+
+### **📅 v3 - Testing (2026.06 예정)**
+* JUnit5 기반 단위/통합 테스트 코드 작성 (커버리지 70% 목표)
+<br>
+
 ## 🏗 시스템 아키텍처 (Architecture)
-*v2 브랜치 작업 후 작성 예정* 
- 
-
-
+> *v2 브랜치 작업 완료 후 다이어그램 업데이트 예정*
 <br>
-## 📊 ERD
-<img width="860" height="1644" alt="Aigument-ERD" src="https://github.com/user-attachments/assets/5fc22530-f1e2-4b52-bbe4-f9131506b51d" />
 
-
-
+## 📊 ERD (Entity Relationship Diagram)
+<img src="https://github.com/user-attachments/assets/5fc22530-f1e2-4b52-bbe4-f9131506b51d" width="80%" alt="Aigument-ERD" />
 <br>
 
 ## 📝 API 명세서
-Swagge : [http://localhost:8080/swagger-ui.html] 
-> localhost와 docker-server 포트 매핑 설정하였음 (8080:8080)
+| 구분 | URL | 비고 |
+| :--- | :--- | :--- |
+| **Swagger UI** | [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html) | 포트 매핑 (8080:8080) |
+
+> **Note**: Docker 환경에서 실행 시 호스트와 컨테이너 간 포트 포워딩 설정이 완료되어 있어야 정상 접속이 가능합니다.
+<br>
