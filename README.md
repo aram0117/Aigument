@@ -63,8 +63,11 @@
 > *v2 브랜치 작업 완료 후 업데이트 예정*
 <br>
 
-## 📊 ERD (Entity Relationship Diagram)
+## 🏗️ 와이어 프레임
+<img width="3324" height="1729" alt="와이어 프레임" src="https://github.com/user-attachments/assets/a22d82bc-2a20-4be8-bd2e-bef6496f677b" />
+<br>
 
+## 📊 ERD (Entity Relationship Diagram)
 | version | ERD |
 | :---    | :---|
 | **v1**  | <img src="https://github.com/user-attachments/assets/5fc22530-f1e2-4b52-bbe4-f9131506b51d" width="80%" alt="Aigument-ERD" /> |
