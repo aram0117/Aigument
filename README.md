@@ -37,7 +37,7 @@
 ## ✨ 주요 기능 및 로드맵
 
 ### **✅ v1 - MVP (Completed)**
-* **인증 및 인가**: JWT 기반 자체 로그인 및 OAuth2 소셜 로그인 연동
+* **인증 및 인가**: JWT 기반 로컬 로그인 및 OAuth2 소셜 로그인 연동
 * **커뮤니티**: 채팅방 생성, 목록 조회 및 실시간 입장/퇴장 시스템
 * **메시징**: Redis RTopic 기반의 분산 메시지 브로커 환경 구축
 * **AI 토론 분석**: OpenAI 및 Ollama 연동을 통한 실시간 승패 판정 로직
@@ -48,16 +48,28 @@
 * 시스템 아키텍처 고도화 및 최적화
 <br>
 
-### **📅 v3 - Testing (2026.06 예정)**
+### **📅 v3 - Additional Features (TBD)**
+* 채팅방 검색 기능
+* 유저 신고와 패널티 기능
+* 관리자 1대1 문의 기능
+* 랜덤 매칭 기능
+<br>
+
+### **📅 Testing (2026.06 예정)**
 * JUnit5 기반 단위/통합 테스트 코드 작성 (커버리지 70% 목표)
 <br>
 
 ## 🏗 시스템 아키텍처 (Architecture)
-> *v2 브랜치 작업 완료 후 다이어그램 업데이트 예정*
+> *v2 브랜치 작업 완료 후 업데이트 예정*
 <br>
 
 ## 📊 ERD (Entity Relationship Diagram)
-<img src="https://github.com/user-attachments/assets/5fc22530-f1e2-4b52-bbe4-f9131506b51d" width="80%" alt="Aigument-ERD" />
+
+| version | ERD |
+| :---    | :---|
+| **v1**  | <img src="https://github.com/user-attachments/assets/5fc22530-f1e2-4b52-bbe4-f9131506b51d" width="80%" alt="Aigument-ERD" /> |
+| **v2**  | *추가예정*    |
+| **v3**  | *추가예정*    |
 <br>
 
 ## 📝 API 명세서
@@ -65,5 +77,5 @@
 | :--- | :--- | :--- |
 | **Swagger UI** | [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html) | 포트 매핑 (8080:8080) |
 
-> **Note**: Docker 환경에서 실행 시 호스트와 컨테이너 간 포트 포워딩 설정이 완료되어 있어야 정상 접속이 가능합니다.
+> **Note**: Docker 실행 시 호스트와 컨테이너 간 포트 포워딩 설정하였습니다.
 <br>
