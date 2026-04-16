@@ -52,4 +52,12 @@ public class ChatRoom {
     public void enterGuestChatRoom(User guest) {
         this.guest = guest;
     }
+
+    public boolean isGuest(Long authUserId) {
+        return this.guest != null && this.guest.getId().equals(authUserId);
+    }
+
+    public void removeGuest() {
+        this.guest = null;
+    }
 }

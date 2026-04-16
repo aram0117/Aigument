@@ -109,7 +109,7 @@ public class ChatRoomService {
                 .orElseThrow(() -> new CustomException(NOT_FOUND_CHATROOM));
 
         // 인증 유저가 게스트 일 때
-        if (foundChatRoom.getGuest().getId().equals(authUser.getId())) {
+        if (foundChatRoom.isGuest(authUser.getId())) {
 
             handleGuestExit(foundChatRoom);
 
@@ -119,26 +119,26 @@ public class ChatRoomService {
         // 유저(host)의 채팅방 존재 여부 검증
         validateChatRoomUser(foundChatRoom.getHost().getId(), authUser.getId());
 
-        // 채팅방 삭제
-        chatRoomRepository.delete(foundChatRoom);
-
         ChatRoomExitAndRemoveEvent event = new ChatRoomExitAndRemoveEvent(foundChatRoom.getId(), foundChatRoom.getHost().getId());
 
         // 채팅방 퇴장 후 삭제 이벤트 발행
         eventPublisher.publishEvent(event);
+
+        // 채팅방 삭제
+        chatRoomRepository.delete(foundChatRoom);
     }
 
 
     // 게스트 나가기 처리
     private void handleGuestExit(ChatRoom foundChatRoom) {
 
-        // 조회한 채팅방 게스트 삭제
-        chatRoomRepository.deleteByGuest(foundChatRoom.getGuest());
-
         GuestExitEvent event = new GuestExitEvent(foundChatRoom.getId(), foundChatRoom.getHost().getId(), foundChatRoom.getGuest().getId());
 
         // 게스트 퇴장 이벤트 발행
         eventPublisher.publishEvent(event);
+
+        // 조회한 채팅방 게스트 삭제
+        foundChatRoom.removeGuest();
     }
 
 
