@@ -14,7 +14,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 import static com.example.aigument.common.infra.redis.enums.RedisPrefix.CHATROOM_TOPIC_NAME;
 
-@Async
+@Async("chatRoomAsyncExecutor")
 @Component
 @RequiredArgsConstructor
 public class ChatRoomPublisher {
