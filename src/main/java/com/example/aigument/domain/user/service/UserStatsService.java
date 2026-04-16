@@ -1,6 +1,8 @@
 package com.example.aigument.domain.user.service;
 
 import com.example.aigument.common.exception.CustomException;
+import com.example.aigument.domain.auth.dto.AuthUser;
+import com.example.aigument.domain.user.dto.response.GetUserStatsResponse;
 import com.example.aigument.domain.user.entity.User;
 import com.example.aigument.domain.user.entity.UserStats;
 import com.example.aigument.domain.user.repository.UserRepository;
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static com.example.aigument.common.exception.ErrorCode.NOT_FOUND_USER;
+import static com.example.aigument.common.exception.ErrorCode.NOT_FOUND_USER_STATS;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +36,15 @@ public class UserStatsService {
 
         winnerStats.incrementWinCount();
         loserStats.incrementLossCount();
+    }
+
+    @Transactional(readOnly = true)
+    public GetUserStatsResponse getUserStats(AuthUser authUser) {
+
+        UserStats foundUserStats = userStatsRepository.findByUserId(authUser.getId())
+                .orElseThrow(() -> new CustomException(NOT_FOUND_USER_STATS));
+
+        return GetUserStatsResponse.from(foundUserStats);
     }
 
 
