@@ -2,6 +2,7 @@ package com.example.aigument.domain.user.entity;
 
 import com.example.aigument.common.enums.annotation.UserRoleValidAnnotation;
 import com.example.aigument.common.enums.UserRole;
+import com.example.aigument.domain.user.dto.request.UpdateUserRequest;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -56,6 +57,17 @@ public class User {
         this.providerId = providerId;
         this.role = role;
         this.userStats = new UserStats(this);
+    }
+
+    public void patchUpdate(UpdateUserRequest updateUserRequest) {
+
+        if (updateUserRequest.getNickName() != null) {
+            this.nickName = updateUserRequest.getNickName();
+        }
+
+        if (updateUserRequest.getEmail() != null) {
+            this.email = updateUserRequest.getEmail();
+        }
     }
 
     public User updateSocialInfo(String nickName, String email) {
