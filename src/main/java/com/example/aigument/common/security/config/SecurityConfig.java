@@ -1,13 +1,12 @@
 package com.example.aigument.common.security.config;
 
 import com.example.aigument.common.security.oauth2.converter.CustomAuthenticationConverter;
+import com.example.aigument.common.security.oauth2.handler.GlobalSocialLonginSuccessHandler;
 import com.example.aigument.common.security.oauth2.repository.HttpCookieOAuth2AuthorizationRequestRepository;
-import com.example.aigument.common.security.oauth2.handler.GoogleSocialLoginJwtGrantSuccessHandler;
 import com.example.aigument.common.security.provider.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -36,7 +35,7 @@ public class SecurityConfig {
     private final JwtProvider jwtProvider;
     private final ClientRegistrationRepository clientRegistrationRepository; // 인증 서버 접근 시 필요한 자원 저장소 (명시적 선언)
     private final HttpCookieOAuth2AuthorizationRequestRepository cookieAuthorizationRequestRepository; // 쿠키 인증 요청 저장소 (default = 세션 인증)
-    private final GoogleSocialLoginJwtGrantSuccessHandler googleHandler; // 구글 사용자 정보 처리
+    private final GlobalSocialLonginSuccessHandler globalSuccessHandler; // 모든 소셜 사용자 정보 처리
     private final CustomAuthenticationConverter authenticationConverter; // 인증 객체 반환 컨버터
 
     @Bean
@@ -47,6 +46,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
+                .logout(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
@@ -71,7 +71,7 @@ public class SecurityConfig {
                         )
                         .redirectionEndpoint(redirection -> redirection
                                 .baseUri("/api/auth/login/oauth2/code/*")) // 공급자가 설정한 리다이렉트 주소
-                        .successHandler(googleHandler) // 공급자로부터 받은 oauth 인증유저로 jwt 토큰 발급 후 처음으로 리다이렉트
+                        .successHandler(globalSuccessHandler) // 공급자로부터 받은 oauth 인증유저로 jwt 토큰 발급 후 처음으로 리다이렉트
                         .failureUrl("/api/auth/login/oauth2?error=true") // 실패 시 예외 처리
                 )
 
@@ -81,11 +81,7 @@ public class SecurityConfig {
                                 .jwtAuthenticationConverter(authenticationConverter)
                                 .decoder(jwtDecoder())
                         )
-                )
-
-                .oidcLogout((logout) -> logout
-                        .backChannel(Customizer.withDefaults()));
-
+                );
 
         return http.build();
     }
