@@ -17,7 +17,7 @@ import java.util.Date;
 @Getter
 public class JwtProvider {
 
-    private final static String TOKEN_PREFIX = "bearer ";
+    private final static String TOKEN_PREFIX = "Bearer ";
 
     @Value("${jwt.secret}")
     private String secretKeyString;
@@ -30,7 +30,7 @@ public class JwtProvider {
         this.secretKey = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateToken(Long id, String username, String email, UserRole role, long expirationTime) {
+    public String generateToken(Long id, String username, String email, UserRole role, String provider,long expirationTime) {
 
         Date now = new Date();
 
@@ -39,6 +39,7 @@ public class JwtProvider {
                 .claim("username", username)
                 .claim("email", email)
                 .claim("role", role.toString())
+                .claim("provider", provider)
                 .signWith(secretKey, Jwts.SIG.HS256)
                 .issuedAt(now)
                 .expiration(new Date(now.getTime() + expirationTime))
