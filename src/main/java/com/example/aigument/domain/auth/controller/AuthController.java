@@ -59,16 +59,6 @@ public class AuthController {
     }
 
 
-    @Operation(summary = "소셜 로그인 처리", description = "OAuth2를 통해 로그인 인증 후 리다이렉트 된 JWT 토큰을 가져옵니다. ex) kakao, google, naver")
-    @GetMapping("/login/oauth2")
-    public ResponseEntity<CommonResponse<String>> oauth2Login(@RequestParam(name = "token") Optional<String> accessToken) {
-
-        String response = accessToken.orElseThrow(() -> new CustomException(UNAUTHORIZED_ACCESS));
-
-        return ResponseEntity.status(HttpStatus.OK).body(CommonResponse.success("소셜 로그인을 완료했습니다.", response));
-    }
-
-
     @Operation(summary = "로그아웃", description = "로그아웃을 진행합니다.")
     @PostMapping("/logout")
     public ResponseEntity<CommonResponse<Void>> logout(@RequestHeader("Authorization") String bearerToken, HttpServletResponse servletResponse) {

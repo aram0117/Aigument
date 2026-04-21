@@ -9,7 +9,7 @@ import com.example.aigument.domain.user.entity.User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -24,6 +24,9 @@ import static com.example.aigument.common.enums.ExpirationTime.*;
 @Component
 @RequiredArgsConstructor
 public abstract class AbstractSocialLoginJwtGrantSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
+
+    @Value("${main.page.url}")
+    private String mainPageUrl;
 
     protected final JwtProvider jwtProvider;
     protected final HttpCookieOAuth2AuthorizationRequestRepository cookieRepository;
@@ -65,7 +68,7 @@ public abstract class AbstractSocialLoginJwtGrantSuccessHandler extends SimpleUr
         cookieRepository.removeAuthorizationRequest(request, response);
 
         // 파람에 JWT 토큰을 담아 로그인 페이지로 리다이렉트
-        String targetUrl = UriComponentsBuilder.fromUriString("http://localhost/api/auth/login/oauth2")
+        String targetUrl = UriComponentsBuilder.fromUriString(mainPageUrl)
                 .queryParam("token", accessToken.substring(7).trim())
                 .build().toUriString();
 
