@@ -9,6 +9,7 @@ import com.example.aigument.domain.user.entity.User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -47,22 +48,21 @@ public abstract class AbstractSocialLoginJwtGrantSuccessHandler extends SimpleUr
         String username = extractUserName(oAuth2User);
         String email = extractEmail(oAuth2User);
         String providerId = extractProviderId(oAuth2User);
-        String provider = authToken.getAuthorizedClientRegistrationId();
+        String provider = authToken.getAuthorizedClientRegistrationId().trim();
 
-        SocialUser socialUser = new SocialUser(username, email, provider, providerId);
+        SocialUser socialUser = new SocialUser(username, email, providerId, provider);
 
         User foundSocialUser= socialService.getSocialUser(socialUser);
 
         // 소셜 유저 정보로 jwt 토큰 발급
-        String accessToken = jwtProvider.generateToken(foundSocialUser.getId(), foundSocialUser.getNickName(), foundSocialUser.getEmail(), foundSocialUser.getRole(), ACCESS_TOKEN_EXPIRATION_TIME.getExpirationTime());
+        String accessToken = jwtProvider.generateToken(foundSocialUser.getId(), foundSocialUser.getNickName(), foundSocialUser.getEmail(), foundSocialUser.getRole(), foundSocialUser.getProvider(), ACCESS_TOKEN_EXPIRATION_TIME.getExpirationTime());
 
-        String refreshToken = jwtProvider.generateToken(foundSocialUser.getId(), foundSocialUser.getNickName(), foundSocialUser.getEmail(), foundSocialUser.getRole(), REFRESH_TOKEN_EXPIRATION_TIME.getExpirationTime());
+        String refreshToken = jwtProvider.generateToken(foundSocialUser.getId(), foundSocialUser.getNickName(), foundSocialUser.getEmail(), foundSocialUser.getRole(), foundSocialUser.getProvider(), REFRESH_TOKEN_EXPIRATION_TIME.getExpirationTime());
 
-        refreshTokenCookie.setRefreshTokenCookie(response, refreshToken);
+        refreshTokenCookie.setRefreshTokenCookie(response, refreshToken.substring(7).trim());
 
         // 쿠키에 저장된 소셜 로그인 관련 요청 데이터 전부 삭제
         cookieRepository.removeAuthorizationRequest(request, response);
-
 
         // 파람에 JWT 토큰을 담아 로그인 페이지로 리다이렉트
         String targetUrl = UriComponentsBuilder.fromUriString("http://localhost/api/auth/login/oauth2")
