@@ -27,4 +27,15 @@ public class RefreshTokenCookie {
 
         response.addHeader("Set-Cookie", cookie.toString());
     }
+
+    public void deleteRefreshTokenCookie(HttpServletResponse response) {
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", "")
+                .httpOnly(true)
+                .secure(false)
+                .maxAge(0) // 삭제 명령
+                .sameSite("Lax")
+                .build();
+
+        response.addHeader("Set-Cookie", cookie.toString());
+    }
 }

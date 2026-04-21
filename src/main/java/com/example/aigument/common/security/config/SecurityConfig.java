@@ -1,5 +1,6 @@
 package com.example.aigument.common.security.config;
 
+import com.example.aigument.common.security.filter.JwtLogoutFilter;
 import com.example.aigument.common.security.oauth2.converter.CustomAuthenticationConverter;
 import com.example.aigument.common.security.oauth2.handler.GlobalSocialLonginSuccessHandler;
 import com.example.aigument.common.security.oauth2.repository.HttpCookieOAuth2AuthorizationRequestRepository;
@@ -20,6 +21,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtTimestampValidator;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -37,6 +39,7 @@ public class SecurityConfig {
     private final HttpCookieOAuth2AuthorizationRequestRepository cookieAuthorizationRequestRepository; // 쿠키 인증 요청 저장소 (default = 세션 인증)
     private final GlobalSocialLonginSuccessHandler globalSuccessHandler; // 모든 소셜 사용자 정보 처리
     private final CustomAuthenticationConverter authenticationConverter; // 인증 객체 반환 컨버터
+    private final JwtLogoutFilter jwtLogoutFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -54,6 +57,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/signup", "/api/auth/login", "/api/**").permitAll()
                         .requestMatchers("/ws-stomp/**").permitAll()
                         .requestMatchers("/chat-test").permitAll()
+                        .requestMatchers("/auth-test").permitAll()
                         .requestMatchers(
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
@@ -75,7 +79,10 @@ public class SecurityConfig {
                         .failureUrl("/api/auth/login/oauth2?error=true") // 실패 시 예외 처리
                 )
 
-                // jwt 검증용 oauth 설정
+                // oauth2ResourceServer에 내장된 BearerTokenAuthenticationFilter 실행 전 로그아웃 토큰 검증
+                .addFilterBefore(jwtLogoutFilter, BearerTokenAuthenticationFilter.class)
+
+                // oauth2ResourceServer 설정
                 .oauth2ResourceServer((oauth2) -> oauth2
                         .jwt((jwt) -> jwt
                                 .jwtAuthenticationConverter(authenticationConverter)

@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -70,14 +71,20 @@ public class AuthController {
 
     @Operation(summary = "로그아웃", description = "로그아웃을 진행합니다.")
     @PostMapping("/logout")
-    public ResponseEntity<CommonResponse<Void>> logout(@RequestHeader("Authorization") String bearerToken) {
+    public ResponseEntity<CommonResponse<Void>> logout(@RequestHeader("Authorization") String bearerToken, HttpServletResponse servletResponse) {
 
         String accessToken = bearerToken.substring(7).trim(); // 순수 토큰 추출
 
-        authService.logout(accessToken);
+        String redirectUrl = authService.logout(accessToken);
 
-        return ResponseEntity.status(HttpStatus.OK).body(CommonResponse.success("로그아웃을 완료했습니다."));
+        refreshTokenCookie.deleteRefreshTokenCookie(servletResponse);
+
+        if (redirectUrl.equals("/")) {
+            return ResponseEntity.status(HttpStatus.OK).body(CommonResponse.success("로그아웃을 완료했습니다."));
+        } else {
+            return ResponseEntity.status(HttpStatus.SEE_OTHER) // 303 Redirect
+                    .header(HttpHeaders.LOCATION, redirectUrl)
+                    .build();
+        }
     }
-
-
 }

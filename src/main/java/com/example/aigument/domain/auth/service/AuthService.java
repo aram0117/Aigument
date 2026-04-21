@@ -29,6 +29,7 @@ public class AuthService {
     private final JwtProvider jwtProvider;
     private final PasswordEncoder passwordEncoder;
     private final RedisTemplate<String, String> redisTemplate;
+    private final LogoutRedirectService logoutRedirectService;
 
 
     @Transactional
@@ -52,10 +53,10 @@ public class AuthService {
         UserResponse userResponse = UserResponse.from(newUser);
 
         // 엑세스 토큰 발급
-        String accessToken = jwtProvider.generateToken(newUser.getId(), newUser.getNickName(), newUser.getEmail(), newUser.getRole(), ACCESS_TOKEN_EXPIRATION_TIME.getExpirationTime());
+        String accessToken = jwtProvider.generateToken(newUser.getId(), newUser.getNickName(), newUser.getEmail(), newUser.getRole(), newUser.getProvider(), ACCESS_TOKEN_EXPIRATION_TIME.getExpirationTime());
 
         // 리프레쉬 토큰 발급
-        String refreshToken = jwtProvider.generateToken(newUser.getId(), newUser.getNickName(), newUser.getEmail(), newUser.getRole(), REFRESH_TOKEN_EXPIRATION_TIME.getExpirationTime());
+        String refreshToken = jwtProvider.generateToken(newUser.getId(), newUser.getNickName(), newUser.getEmail(), newUser.getRole(), newUser.getProvider(), REFRESH_TOKEN_EXPIRATION_TIME.getExpirationTime());
 
         TokenResponse tokenResponse = new TokenResponse(accessToken, refreshToken);
 
@@ -74,17 +75,19 @@ public class AuthService {
         }
 
         // 엑세스 토큰 발급
-        String accessToken = jwtProvider.generateToken(foundUser.getId(), foundUser.getNickName(), foundUser.getEmail(), foundUser.getRole(), ACCESS_TOKEN_EXPIRATION_TIME.getExpirationTime());
+        String accessToken = jwtProvider.generateToken(foundUser.getId(), foundUser.getNickName(), foundUser.getEmail(), foundUser.getRole(), foundUser.getProvider(), ACCESS_TOKEN_EXPIRATION_TIME.getExpirationTime());
 
         // 리프레쉬 토큰 발급
-        String refreshToken = jwtProvider.generateToken(foundUser.getId(), foundUser.getNickName(), foundUser.getEmail(), foundUser.getRole(), REFRESH_TOKEN_EXPIRATION_TIME.getExpirationTime());
+        String refreshToken = jwtProvider.generateToken(foundUser.getId(), foundUser.getNickName(), foundUser.getEmail(), foundUser.getRole(), foundUser.getProvider(), REFRESH_TOKEN_EXPIRATION_TIME.getExpirationTime());
 
         return TokenResponse.from(accessToken, refreshToken);
     }
 
 
     @Transactional
-    public void logout(String accessToken) {
+    public String logout(String accessToken) {
+
+        String provider = jwtProvider.getClaims(accessToken).get("provider", String.class);
 
         long expiration = jwtProvider.getClaims(accessToken).getExpiration().getTime();
 
@@ -94,7 +97,11 @@ public class AuthService {
         long redisExpire = expiration - now;
 
         // redis에 logout 값 저장
-        redisTemplate.opsForValue().set(accessToken, "logout", redisExpire, TimeUnit.MILLISECONDS);
+        if (redisExpire > 0) {
+            redisTemplate.opsForValue().set(accessToken, "logout", redisExpire, TimeUnit.MILLISECONDS);
+        }
+
+        return logoutRedirectService.getRedirectUrl(provider);
     }
 
 
