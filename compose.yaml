@@ -6,8 +6,8 @@ services:
       - "80:80"
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./nginx/chat-html:/usr/share/nginx/html:ro # 테스트용 html
-      - ./nginx/auth-html:/usr/share/nginx/html:ro
+      - ./nginx/chat-html:/usr/share/nginx/html:ro # 체팅 테스트용 html
+      - ./nginx/auth-html:/usr/share/nginx/html:ro # 인증 테스트용 html
     depends_on:
       - app
     networks:
@@ -34,6 +34,7 @@ services:
       SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI}
       MAIN_PAGE_URL: ${MAIN_PAGE_URL}
+      COOKIE_SECURE: false # 배포 시 true로 변경
     depends_on:
       db:
         condition: service_healthy
