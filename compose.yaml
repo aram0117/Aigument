@@ -7,6 +7,7 @@ services:
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
       - ./nginx/chat-html:/usr/share/nginx/html:ro # 테스트용 html
+      - ./nginx/auth-html:/usr/share/nginx/html:ro
     depends_on:
       - app
     networks:
@@ -32,6 +33,7 @@ services:
       SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI}
+      MAIN_PAGE_URL: ${MAIN_PAGE_URL}
     depends_on:
       db:
         condition: service_healthy
