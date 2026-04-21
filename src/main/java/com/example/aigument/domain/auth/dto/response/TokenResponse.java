@@ -1,5 +1,6 @@
 package com.example.aigument.domain.auth.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -8,7 +9,9 @@ import lombok.RequiredArgsConstructor;
 public class TokenResponse {
 
     private final String accessToken;
-    private final String refreshToken;
+
+    @JsonIgnore
+    private final String refreshToken; // JSON 응답 바디에서 제외 (쿠키로만 전달)
 
     public static TokenResponse from(String accessToken, String refreshToken) {
         return new TokenResponse(accessToken, refreshToken);
