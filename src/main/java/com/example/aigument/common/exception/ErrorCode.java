@@ -10,12 +10,17 @@ public enum ErrorCode {
 
     // user
     NOT_FOUND_USER(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
+    SOCIAL_ACCOUNT_CANNOT_USER_MODIFY(HttpStatus.FORBIDDEN, "소셜 로그인 계정은 사용자 정보를 수정할 수 없습니다."),
+    WRONG_PASSWORD_CONFIRM(HttpStatus.BAD_REQUEST, "입력하신 비밀번호를 다시 확인해 주세요."),
+    NOT_FOUND_USER_STATS(HttpStatus.NOT_FOUND, "사용자 상태를 찾을 수 없습니다."),
 
     // auth
     NICKNAME_ALREADY_EXISTS(HttpStatus.CONFLICT, "중복된 닉네임 입니다."),
     EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "중복된 이메일 입니다."),
     LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "로그인 정보가 올바르지 않습니다."),
     UNAUTHORIZED_ACCESS(HttpStatus.UNAUTHORIZED, "인증 정보가 없거나 유효하지 않습니다."),
+    UNSUPPORTED_SOCIAL_PROVIDER(HttpStatus.BAD_REQUEST, "지원하지 않는 소셜 로그인 공급자입니다."),
+    LOGGED_OUT_TOKEN(HttpStatus.UNAUTHORIZED, "로그아웃된 토큰입니다. 다시 로그인해주세요."),
 
     // chatroom
     NOT_FOUND_CHATROOM(HttpStatus.NOT_FOUND, "채팅방을 찾을 수 없습니다."),
