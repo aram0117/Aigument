@@ -69,7 +69,7 @@ public abstract class AbstractSocialLoginJwtGrantSuccessHandler extends SimpleUr
 
         // 파람에 JWT 토큰을 담아 로그인 페이지로 리다이렉트
         String targetUrl = UriComponentsBuilder.fromUriString(mainPageUrl)
-                .queryParam("token", accessToken.substring(7).trim())
+                .queryParam("token", accessToken)
                 .build().toUriString();
 
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
