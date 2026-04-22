@@ -68,7 +68,7 @@ public class SecurityConfig {
 
                 // 소셜 로그인
                 .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/api/auth/login/oauth2")
+                        // default login page : /oauth2/authorization/{provider}
                         .clientRegistrationRepository(clientRegistrationRepository)
                         .authorizationEndpoint(auth -> auth
                                 .authorizationRequestRepository(cookieAuthorizationRequestRepository)
