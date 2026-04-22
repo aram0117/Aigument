@@ -61,7 +61,7 @@ public class AuthController {
 
     @Operation(summary = "로그아웃", description = "로그아웃을 진행합니다.")
     @PostMapping("/logout")
-    public ResponseEntity<CommonResponse<Void>> logout(@RequestHeader("Authorization") String bearerToken, HttpServletResponse servletResponse) {
+    public ResponseEntity<CommonResponse<String>> logout(@RequestHeader("Authorization") String bearerToken, HttpServletResponse servletResponse) {
 
         String accessToken = bearerToken.substring(7).trim(); // 순수 토큰 추출
 
@@ -69,12 +69,6 @@ public class AuthController {
 
         refreshTokenCookie.deleteRefreshTokenCookie(servletResponse);
 
-        if (redirectUrl.equals("/")) {
-            return ResponseEntity.status(HttpStatus.OK).body(CommonResponse.success("로그아웃을 완료했습니다."));
-        } else {
-            return ResponseEntity.status(HttpStatus.SEE_OTHER) // 303 Redirect
-                    .header(HttpHeaders.LOCATION, redirectUrl)
-                    .build();
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(CommonResponse.success("로그아웃을 완료했습니다.", redirectUrl));
     }
 }
