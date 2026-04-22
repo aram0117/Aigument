@@ -6,7 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -17,11 +17,11 @@ import static com.example.aigument.common.exception.ErrorCode.LOGGED_OUT_TOKEN;
 @Component
 public class JwtLogoutFilter extends OncePerRequestFilter {
 
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final StringRedisTemplate redisTemplate;
     private final HandlerExceptionResolver resolver;
 
     public JwtLogoutFilter(
-            RedisTemplate<String, Object> redisTemplate,
+            StringRedisTemplate redisTemplate,
             @Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver) {
         this.redisTemplate = redisTemplate;
         this.resolver = resolver;
@@ -34,7 +34,7 @@ public class JwtLogoutFilter extends OncePerRequestFilter {
             String token = resolveToken(request);
 
             if (token != null) {
-                String logoutStatus = (String) redisTemplate.opsForValue().get(token);
+                String logoutStatus = redisTemplate.opsForValue().get(token);
 
                 if ("logout".equals(logoutStatus)) {
                     throw new CustomException(LOGGED_OUT_TOKEN);
