@@ -9,6 +9,7 @@ import com.example.aigument.domain.chatroom.dto.response.GetAllChatRoomResponse;
 import com.example.aigument.domain.chatroom.dto.response.GetChatRoomResponse;
 import com.example.aigument.domain.chatroom.service.ChatRoomService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "chat_room", description = "채팅방 api")
 @RestController
 @RequestMapping("/api/chatroom")
 @RequiredArgsConstructor
@@ -43,7 +45,7 @@ public class ChatRoomController {
     }
 
     @Operation(summary = "채팅방 목록 조회", description = "채팅방 전체 목록을 조회합니다.")
-    @GetMapping()
+    @GetMapping
     public ResponseEntity<CommonResponse<List<GetAllChatRoomResponse>>> getAllChatRoom() {
 
         List<GetAllChatRoomResponse> response = chatRoomService.getAllChatRoom();

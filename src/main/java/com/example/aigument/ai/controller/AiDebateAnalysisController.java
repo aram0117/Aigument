@@ -3,6 +3,7 @@ package com.example.aigument.ai.controller;
 import com.example.aigument.ai.service.AiDebateAnalysisService;
 import com.example.aigument.common.dto.response.CommonResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "ai_debate_analysis", description = "ai 토론 분석 api")
 @RestController
 @RequestMapping("/api/ai")
 @RequiredArgsConstructor

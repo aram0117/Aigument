@@ -9,12 +9,15 @@ import com.example.aigument.domain.user.dto.response.UpdateUserResponse;
 import com.example.aigument.domain.user.service.UserService;
 import com.example.aigument.domain.user.service.UserStatsService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "user", description = "사용자 api")
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
@@ -24,7 +27,7 @@ public class UserController {
     private final UserStatsService userStatsService;
 
     @Operation(summary = "내 정보 조회", description = "사용자 본인의 계정 정보를 조회합니다.")
-    @GetMapping()
+    @GetMapping
     public ResponseEntity<CommonResponse<GetUserResponse>> getUser(@AuthenticationPrincipal AuthUser authUser) {
 
         GetUserResponse response = userService.getUser(authUser);
@@ -33,8 +36,8 @@ public class UserController {
     }
 
     @Operation(summary = "내 정보 부분 수정", description = "사용자 본인의 닉네임과 이메일을 부분 수정합니다.")
-    @PatchMapping()
-    public ResponseEntity<CommonResponse<UpdateUserResponse>> updateUser(@AuthenticationPrincipal AuthUser authUser, @RequestBody UpdateUserRequest request) {
+    @PatchMapping
+    public ResponseEntity<CommonResponse<UpdateUserResponse>> updateUser(@AuthenticationPrincipal AuthUser authUser, @Valid @RequestBody UpdateUserRequest request) {
 
         UpdateUserResponse response = userService.updateUser(authUser, request);
 

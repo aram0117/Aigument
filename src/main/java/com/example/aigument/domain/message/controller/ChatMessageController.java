@@ -6,6 +6,7 @@ import com.example.aigument.domain.message.dto.response.ChatMessageResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
@@ -18,7 +19,8 @@ import java.time.LocalDateTime;
 
 import static com.example.aigument.common.infra.redis.enums.RedisPrefix.CHATROOM_TOPIC_NAME;
 
-@RestController
+@Tag(name = "chat_message", description = "채팅 메시지 api")
+@RestController("/api/chat/message/")
 @RequiredArgsConstructor
 public class ChatMessageController {
 
@@ -27,7 +29,7 @@ public class ChatMessageController {
     private final ObjectMapper objectMapper;
 
     @Operation(summary = "채팅 메시지 전송", description = "두명의 유저가 채팅 메시지를 주고받습니다.")
-    @MessageMapping("/chat/message/{chatRoomId}")
+    @MessageMapping("{chatRoomId}")
     public void sendMessage(@DestinationVariable Long chatRoomId, ChatMessageRequest request) throws JsonProcessingException {
 
         // 메시지 응답 객체 생성
