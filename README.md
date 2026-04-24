@@ -78,9 +78,6 @@
 ## 📝 API 명세서
 | 구분 | URL | 비고 |
 | :--- | :--- | :--- |
-| **Swagger UI** | [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html) | 포트 매핑 (8080:8080) |
-
-> **Note**: Docker 실행 시 호스트와 컨테이너 간 포트 포워딩 설정하였습니다.
-
+| **Swagger UI** | [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html) | Docker 실행 시 호스트와 컨테이너 간 포트 포워딩 설정하였습니다. |
 | **notion** | https://www.notion.so/Aigument-API-Specification-34c72de835a180ef9e19cd0c28ced4a9?source=copy_link | :--- |
 <br>
