@@ -11,8 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
+import org.springframework.util.StringUtils;
 
 import static com.example.aigument.common.exception.ErrorCode.*;
 
@@ -72,20 +71,18 @@ public class UserService {
 
     private void duplicationCheck(String requestNickName, String requestEmail) {
 
-        // 요청 닉네임 인자가 null이 아닐 때만 조회 실행
-        Optional.ofNullable(requestNickName)
-                .ifPresent(nickName -> {
-                    if (userRepository.existsByNickName(nickName)) {
-                        throw new CustomException(NICKNAME_ALREADY_EXISTS);
-                    }
-                });
+        // 요청 닉네임 인자가 null, 공백, 빈 문자열이 아닐 경우 조회 실행
+        if (StringUtils.hasText(requestNickName)) {
+            if (userRepository.existsByNickName(requestNickName)) {
+                throw new CustomException(NICKNAME_ALREADY_EXISTS);
+            }
+        }
 
-        // 요청 이메일 인자가 null이 아닐 때만 조회 실행
-        Optional.ofNullable(requestEmail)
-                .ifPresent(email -> {
-                    if (userRepository.existsByEmail(email)) {
-                        throw new CustomException(EMAIL_ALREADY_EXISTS);
-                    }
-                });
+        // 요청 이메일 인자가 null, 공백, 빈 문자열이 아닐 경우 조회 실행
+        if (StringUtils.hasText(requestEmail)) {
+            if (userRepository.existsByEmail(requestEmail)) {
+                throw new CustomException(EMAIL_ALREADY_EXISTS);
+            }
+        }
     }
 }
