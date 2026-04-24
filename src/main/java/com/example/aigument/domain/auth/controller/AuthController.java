@@ -1,7 +1,6 @@
 package com.example.aigument.domain.auth.controller;
 
 import com.example.aigument.common.dto.response.CommonResponse;
-import com.example.aigument.common.exception.CustomException;
 import com.example.aigument.common.security.provider.RefreshTokenCookie;
 import com.example.aigument.domain.auth.dto.response.TokenResponse;
 import com.example.aigument.domain.auth.dto.request.LoginRequest;
@@ -13,14 +12,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
-
-import static com.example.aigument.common.exception.ErrorCode.UNAUTHORIZED_ACCESS;
 
 @Tag(name = "auth", description = "인증 관련 API")
 @RestController
