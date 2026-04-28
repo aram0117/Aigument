@@ -56,8 +56,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers("/api/auth/signup", "/api/auth/login", "/api/**").permitAll()
                         .requestMatchers("/ws-stomp/**").permitAll()
-                        .requestMatchers("/chat-test").permitAll()
-                        .requestMatchers("/auth-test").permitAll()
                         .requestMatchers(
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
