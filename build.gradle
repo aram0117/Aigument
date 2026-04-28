@@ -59,6 +59,9 @@ dependencies {
 
     // docs
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5'
+
+    // sms
+    implementation 'com.solapi:sdk:1.0.3'
 }
 
 dependencyManagement {
