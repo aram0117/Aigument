@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 import static com.example.aigument.common.enums.UserRole.USER;
 import static com.example.aigument.common.exception.ErrorCode.*;
 import static com.example.aigument.common.enums.ExpirationTime.*;
+import static com.example.aigument.common.infra.redis.enums.RedisPrefix.SMS_AUTH_PREFIX;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +38,9 @@ public class AuthService {
 
         // 중복 검증
         duplicationCheck(request.getNickName(), request.getEmail());
+
+        // 인증 코드 검증
+        validateVerificationCode(request.getPhoneNumber(), request.getInputCode());
 
         User newUser = User.builder()
                 .nickName(request.getNickName())
@@ -120,6 +124,17 @@ public class AuthService {
 
         if (isDuplicateEmail) {
             throw new CustomException(EMAIL_ALREADY_EXISTS);
+        }
+    }
+
+    private void validateVerificationCode(String phoneNumber, String inputCode) {
+
+        String redisKey =  SMS_AUTH_PREFIX.getPrefix() + phoneNumber;
+        String verificationCode = redisTemplate.opsForValue().get(redisKey);
+
+        // 입력한 코드와 인증 코드가 다를 때
+        if (!inputCode.equals(verificationCode)) {
+            throw new CustomException(AUTH_CODE_MISMATCH);
         }
     }
 }

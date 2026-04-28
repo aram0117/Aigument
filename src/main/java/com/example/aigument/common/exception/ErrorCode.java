@@ -21,6 +21,8 @@ public enum ErrorCode {
     UNAUTHORIZED_ACCESS(HttpStatus.UNAUTHORIZED, "인증 정보가 없거나 유효하지 않습니다."),
     UNSUPPORTED_SOCIAL_PROVIDER(HttpStatus.BAD_REQUEST, "지원하지 않는 소셜 로그인 공급자입니다."),
     LOGGED_OUT_TOKEN(HttpStatus.UNAUTHORIZED, "로그아웃된 토큰입니다. 다시 로그인해주세요."),
+    SMS_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR,"인증번호 발송 중 에러가 발생했습니다."),
+    AUTH_CODE_MISMATCH(HttpStatus.BAD_REQUEST, "인증번호가 일치하지 않습니다."),
 
     // chatroom
     NOT_FOUND_CHATROOM(HttpStatus.NOT_FOUND, "채팅방을 찾을 수 없습니다."),

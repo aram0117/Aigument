@@ -31,4 +31,8 @@ public class SignupRequest {
             message = "올바른 휴대폰 번호 형식이 아닙니다. (예: 010-1234-5678)"
     )
     private String phoneNumber;
+
+    @NotBlank(message = "인증코드를 입력해주세요.")
+    @Pattern(regexp = "^[0-9]{6}$", message = "6자리 숫자만 입력 가능합니다.")
+    private String inputCode;
 }
