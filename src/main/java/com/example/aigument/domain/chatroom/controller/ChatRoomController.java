@@ -52,6 +52,7 @@ public class ChatRoomController {
 
         return ResponseEntity.status(HttpStatus.OK).body(CommonResponse.success("채팅방 목록 조회에 성공했습니다.", response));
     }
+
     @Operation(summary = "게스트 채팅방 입장", description = "해당 채팅방으로 게스트가 입장합니다.")
     @PostMapping("/{id}/entry")
     public ResponseEntity<CommonResponse<EnterChatRoomResponse>> enterChatRoom(@PathVariable Long id, @AuthenticationPrincipal AuthUser authUser) {
