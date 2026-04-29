@@ -4,5 +4,6 @@ import lombok.Getter;
 
 @Getter
 public enum CategoryType {
-    SPORTS
+    SPORTS, SOCIETY,
+    FOOD, LOVE
 }
