@@ -23,6 +23,8 @@ public enum ErrorCode {
     LOGGED_OUT_TOKEN(HttpStatus.UNAUTHORIZED, "로그아웃된 토큰입니다. 다시 로그인해주세요."),
     SMS_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR,"인증번호 발송 중 에러가 발생했습니다."),
     AUTH_CODE_MISMATCH(HttpStatus.BAD_REQUEST, "인증번호가 일치하지 않습니다."),
+    INVALID_REGISTRATION_STEP(HttpStatus.FORBIDDEN, "인증 번호가 발급된 휴대폰 번호로 회원가입을 진행해주세요."),
+    UNVERIFIED_PHONE_NUMBER(HttpStatus.BAD_REQUEST, "가입된 휴대폰 번호로 인증코드를 발급해주세요."),
 
     // chatroom
     NOT_FOUND_CHATROOM(HttpStatus.NOT_FOUND, "채팅방을 찾을 수 없습니다."),

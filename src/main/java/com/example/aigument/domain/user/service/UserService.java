@@ -108,6 +108,10 @@ public class UserService {
         String redisKey = SMS_AUTH_PREFIX.getPrefix() + phoneNumber;
         String verificationCode = redisTemplate.opsForValue().get(redisKey);
 
+        // 계정에 등록된 휴대폰 번호로 인증 코드 요청을 하지 않을 때 (verificationCode -> null)
+        Optional.ofNullable(verificationCode)
+                .orElseThrow(() -> new CustomException(UNVERIFIED_PHONE_NUMBER));
+
         // 입력한 코드와 인증 코드가 다를 때
         if (!inputCode.equals(verificationCode)) {
             throw new CustomException(AUTH_CODE_MISMATCH);

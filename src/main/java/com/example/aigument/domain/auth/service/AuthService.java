@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static com.example.aigument.common.enums.UserRole.USER;
@@ -129,8 +130,12 @@ public class AuthService {
 
     private void validateVerificationCode(String phoneNumber, String inputCode) {
 
-        String redisKey =  SMS_AUTH_PREFIX.getPrefix() + phoneNumber;
+        String redisKey = SMS_AUTH_PREFIX.getPrefix() + phoneNumber;
         String verificationCode = redisTemplate.opsForValue().get(redisKey);
+
+        // 인증코드를 받은 휴대폰 번호로 인증코드를 입력하지 않았을 경우 (verificationCode -> null)
+        Optional.ofNullable(verificationCode)
+                .orElseThrow(() -> new CustomException(INVALID_REGISTRATION_STEP));
 
         // 입력한 코드와 인증 코드가 다를 때
         if (!inputCode.equals(verificationCode)) {
