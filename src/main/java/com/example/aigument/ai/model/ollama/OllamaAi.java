@@ -1,6 +1,7 @@
 package com.example.aigument.ai.model.ollama;
 
 import com.example.aigument.common.exception.CustomException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Component;
@@ -10,15 +11,16 @@ import reactor.netty.http.client.HttpClient;
 
 import java.time.Duration;
 import java.util.Map;
+import java.util.concurrent.TimeoutException;
 
 import static com.example.aigument.common.exception.ErrorCode.AI_COMMUNICATION_ERROR;
 import static com.example.aigument.common.exception.ErrorCode.AI_RESPONSE_TIMEOUT;
 
+@Slf4j
 @Component
 public class OllamaAi {
 
     private final WebClient webClient;
-
 
     public OllamaAi(@Value("${ollama.base.url}") String baseUrl) {
 
@@ -31,17 +33,13 @@ public class OllamaAi {
                 .build();
     }
 
-    /**
-     * Ollama3 공식 문서 기준 RestAPI 규격
-     * 출처 = <a href="https://docs.ollama.com/api/generate">...</a>
-     */
     public Mono<String> askOllama3(String prompt) {
 
         Map<String, Object> requestBody = Map.of(
                 "model", "llama3",
                 "prompt", prompt,
-                "stream", false,  // 비스트링 방식
-                "format", "json" // ai 응답은 json 형태로 받음
+                "stream", false,
+                "format", "json"
         );
 
         return webClient.post()
@@ -50,14 +48,11 @@ public class OllamaAi {
                 .retrieve()
                 .bodyToMono(Map.class)
                 .map(res -> res.get("response").toString())
-                .onErrorMap(e -> {
-
-                    // ai 타임 아웃으로 인한 에러 응답
-                    if (e instanceof java.util.concurrent.TimeoutException) {
-                        return new CustomException(AI_RESPONSE_TIMEOUT);
-                    }
-                    // ai 서버 관련 에러 응답
-                    return new CustomException(AI_COMMUNICATION_ERROR);
-                });
+                // 에러 발생 시 원본 원인을 파악하기 위한 로깅
+                .doOnError(e -> log.error("[OllamaAi] API Request Failed. Cause: {}", e.getMessage()))
+                // 예외 타입에 따른 세밀한 매핑
+                .onErrorMap(TimeoutException.class, e -> new CustomException(AI_RESPONSE_TIMEOUT))
+                // CustomException이 아닌 기타 모든 에러는 통신 에러로 간주
+                .onErrorMap(e -> !(e instanceof CustomException), e -> new CustomException(AI_COMMUNICATION_ERROR));
     }
 }

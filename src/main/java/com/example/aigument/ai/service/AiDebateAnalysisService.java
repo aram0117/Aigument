@@ -6,7 +6,7 @@ import com.example.aigument.domain.user.service.UserStatsService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.redisson.api.RTopic;
+import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -17,6 +17,7 @@ import static com.example.aigument.common.exception.ErrorCode.AI_ANALYSIS_FAILED
 import static com.example.aigument.common.exception.ErrorCode.EMPTY_CHAT_LOG;
 import static com.example.aigument.common.infra.redis.enums.RedisPrefix.CHATROOM_LOG_NAME;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AiDebateAnalysisService {
@@ -27,44 +28,31 @@ public class AiDebateAnalysisService {
     private final UserStatsService userStatsService;
     private final ObjectMapper objectMapper;
 
-
     public void analyzeDebate(Long chatRoomId) {
 
-        String key = CHATROOM_LOG_NAME.getPrefix() + chatRoomId;
+        String channel = CHATROOM_LOG_NAME.getPrefix() + chatRoomId;
+        List<String> messages = redisTemplate.opsForList().range(channel, 0, -1);
 
-        // 첫 채팅 부터 마지막 채팅 기록까지 가져오기
-        List<String> messages = redisTemplate.opsForList().range(key, 0, -1);
-
-        // 메시지 검증
         if (messages == null || messages.isEmpty()) {
-
             throw new CustomException(EMPTY_CHAT_LOG);
         }
 
-        // 모든 채팅 기록을 하나의 문자열로 결합
         String fullChatLog = String.join("\n", messages);
-
-        // 프롬프트 문자열 생성
         String prompt = createPrompt(fullChatLog);
 
+        log.info("[AiAnalysisService] 토론 분석 시작 - ChatRoomId: {}", chatRoomId);
 
-        /**
-         *  AI에 프롬프트 반환 (비동기 처리)
-         *  치리후 ai 결과와 처리중 발생한 에러 메시지를 콜백
-         */
+        // 핵심 리팩토링: WebFlux 체인 정리 및 에러 콜백 명시
         ollamaAi.askOllama3(prompt)
-                .doOnSuccess(result -> sendAiSuccess(result, key))
-                .onErrorMap(error -> new CustomException(AI_ANALYSIS_FAILED))
-                .doOnError(customError -> sendAiError(customError.getMessage(), key))
-                .subscribe();
+                .subscribe(
+                        // onNext: 성공 시 처리 로직
+                        result -> handleAiSuccess(result, channel),
+                        // onError: 실패 시 처리 로직 (이 부분이 없어서 ErrorCallbackNotImplemented 발생)
+                        error -> handleAiError(error, channel)
+                );
     }
 
-
-    /**
-     * 프롬프트 생성
-     */
     private String createPrompt(String fullChatLog) {
-
         return String.format(
                 """
                         당신은 전문 토론 판정관입니다.
@@ -80,60 +68,48 @@ public class AiDebateAnalysisService {
         );
     }
 
-
-    /**
-     * AI 응답 성공과 실패를 클라이언트에게 알림
-     */
-    private void sendAiSuccess(String result, String channel) {
+    private void handleAiSuccess(String result, String channel) {
 
         try {
-
-            RTopic topic = redissonClient.getTopic(channel);
-
             JsonNode jsonNode = objectMapper.readTree(result);
 
-            String winner = jsonNode.get("winner").asText();
-            String loser = jsonNode.get("loser").asText();
-            String reason = jsonNode.get("reason").asText("승자의 근거가 더 타당 하다고 판단 하였습니다."); // ai 디폴트 응답
+            // get() 대신 path()를 사용하여 NPE 방지 및 기본값 세팅
+            String winner = jsonNode.path("winner").asText("승자 판독 불가");
+            String loser = jsonNode.path("loser").asText("패자 판독 불가");
+            String reason = jsonNode.path("reason").asText("승자의 근거가 더 타당하다고 판단하였습니다.");
 
-            // 승패 결과 반영
             userStatsService.incrementStatsCount(winner, loser);
 
-            // ai 성공 응답
             String msg = String.format(
-                    """
-                            ai 분석이 완료되었습니다.
-                            
-                            [winner]
-                            유저:%s
-                            
-                            [이유]
-                            %s""",
+                    "ai 분석이 완료되었습니다.\n\n[winner]\n유저:%s\n\n[이유]\n%s",
                     winner, reason
             );
 
-            topic.publish(msg);
+            redissonClient.getTopic(channel).publish(msg);
+            log.info("[AiAnalysisService] 분석 완료 퍼블리싱 성공 - Channel: {}", channel);
 
         } catch (Exception e) {
-
-            sendAiError(e.getMessage(), channel);
+            // AI가 JSON 형식을 지키지 않고 잡설을 덧붙인 경우 파싱 에러 발생 가능
+            log.error("[AiAnalysisService] AI 응답 파싱 실패. 원본 응답: {}", result, e);
+            handleAiError(new CustomException(AI_ANALYSIS_FAILED), channel);
         }
     }
 
-    private void sendAiError(String error, String channel) {
+    private void handleAiError(Throwable error, String channel) {
 
-        RTopic topic = redissonClient.getTopic(channel);
+        log.error("[AiAnalysisService] 분석 프로세스 중 에러 발생 - Channel: {}", channel, error);
 
-        // ai 실패 응답
+        // 에러 타입에 따라 클라이언트에게 보여줄 메시지 결정
+        String errorMessage = error instanceof CustomException
+                ? error.getMessage()
+                : "AI 토론 분석 중 알 수 없는 서버 오류가 발생했습니다.";
+
         String msg = String.format(
-                """
-                        ai 분석 중 오류가 발생했습니다.
-                        
-                        [상세 사유]
-                        %s""",
-                error
+                "ai 분석 중 오류가 발생했습니다.\n\n[상세 사유]\n%s",
+                errorMessage
         );
 
-        topic.publish(msg);
+        // 실패 메시지 퍼블리싱 (이 과정에서 에러가 나면 더 이상 복구 불가하므로 try-catch 생략 또는 최소화)
+        redissonClient.getTopic(channel).publish(msg);
     }
 }
