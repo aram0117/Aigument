@@ -1,6 +1,6 @@
-package com.example.aigument.common.enums.annotation;
+package com.example.aigument.common.annotation;
 
-import com.example.aigument.common.enums.valid.UserRoleValidator;
+import com.example.aigument.common.valid.UserRoleValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
