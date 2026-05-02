@@ -20,7 +20,7 @@ import java.util.List;
 
 @Tag(name = "chat_room", description = "채팅방 api")
 @RestController
-@RequestMapping("/api/chatroom")
+@RequestMapping("/api/chatRoom")
 @RequiredArgsConstructor
 public class ChatRoomController {
 
