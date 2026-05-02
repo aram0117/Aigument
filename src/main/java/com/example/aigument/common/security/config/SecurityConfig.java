@@ -4,6 +4,7 @@ import com.example.aigument.common.security.filter.JwtLogoutFilter;
 import com.example.aigument.common.security.oauth2.converter.CustomAuthenticationConverter;
 import com.example.aigument.common.security.oauth2.handler.GlobalSocialLonginSuccessHandler;
 import com.example.aigument.common.security.oauth2.repository.HttpCookieOAuth2AuthorizationRequestRepository;
+import com.example.aigument.common.security.provider.JwtConfig;
 import com.example.aigument.common.security.provider.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -40,6 +41,7 @@ public class SecurityConfig {
     private final GlobalSocialLonginSuccessHandler globalSuccessHandler; // 모든 소셜 사용자 정보 처리
     private final CustomAuthenticationConverter authenticationConverter; // 인증 객체 반환 컨버터
     private final JwtLogoutFilter jwtLogoutFilter;
+    private final JwtDecoder jwtDecoder;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -84,7 +86,7 @@ public class SecurityConfig {
                 .oauth2ResourceServer((oauth2) -> oauth2
                         .jwt((jwt) -> jwt
                                 .jwtAuthenticationConverter(authenticationConverter)
-                                .decoder(jwtDecoder())
+                                .decoder(jwtDecoder)
                         )
                 );
 
@@ -117,27 +119,6 @@ public class SecurityConfig {
     @Bean
     public static GrantedAuthorityDefaults grantedAuthorityDefaults() {
         return new GrantedAuthorityDefaults("");
-    }
-
-
-    /**
-     * 시큐리티가 관리 하는 jwt의 시크릿 키 검증
-     * 시간 오차 범위 60초 설정
-     */
-    @Bean
-    public JwtDecoder jwtDecoder() {
-
-        NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withSecretKey(jwtProvider.getSecretKey())
-                .macAlgorithm(MacAlgorithm.HS256)
-                .build();
-
-        OAuth2TokenValidator<Jwt> withClockSkew = new DelegatingOAuth2TokenValidator<>(
-                new JwtTimestampValidator(Duration.ofSeconds(60))
-        );
-
-        jwtDecoder.setJwtValidator(withClockSkew);
-
-        return jwtDecoder;
     }
 }
 
