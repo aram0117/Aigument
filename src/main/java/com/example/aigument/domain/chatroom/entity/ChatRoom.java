@@ -1,6 +1,6 @@
 package com.example.aigument.domain.chatroom.entity;
 
-import com.example.aigument.common.enums.annotation.UserRoleValidAnnotation;
+import com.example.aigument.common.annotation.UserRoleValidAnnotation;
 import com.example.aigument.common.enums.CategoryType;
 import com.example.aigument.domain.user.entity.User;
 import jakarta.persistence.Entity;

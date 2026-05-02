@@ -22,7 +22,7 @@ public class ChatRoomPublisher {
     private final RedissonClient redissonClient;
     private final SimpMessagingTemplate messagingTemplate;
 
-    private static final String destination = "/user/chat/room";
+    private static final String destination = "/chat/room";
 
     /**
      * 채팅 시작 이벤트 발행
@@ -70,12 +70,10 @@ public class ChatRoomPublisher {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void chatRoomExitAndRemoveEventPublish(ChatRoomExitAndRemoveEvent event) {
 
-        String msg = String.format(
-                """
-                        채팅방을 퇴장하셨습니다.
-                        해당 채팅방은 자동 삭제됩니다.
-                        """
-        );
+        String msg = """
+                채팅방을 퇴장하셨습니다.
+                해당 채팅방은 자동 삭제됩니다.
+                """;
 
         // 채팅방 퇴장 후 삭제 이벤트 메시지를 호스트에게 발행
         messagingTemplate.convertAndSendToUser(String.valueOf(event.getHostId()), destination, msg);

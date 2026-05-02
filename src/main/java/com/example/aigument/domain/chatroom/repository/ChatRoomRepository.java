@@ -2,6 +2,7 @@ package com.example.aigument.domain.chatroom.repository;
 
 import com.example.aigument.domain.chatroom.entity.ChatRoom;
 import com.example.aigument.domain.user.entity.User;
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -14,12 +15,12 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 
     // LEFT OUTER JOIN이며 연관관계 데이터 null 조회 허용
     @EntityGraph(attributePaths = {"host", "guest"})
-    Optional<ChatRoom> findById(Long id);
+    @NonNull
+    Optional<ChatRoom> findById(@NonNull Long id);
 
     @EntityGraph(attributePaths = {"host", "guest"})
+    @NonNull
     List<ChatRoom> findAll();
 
     boolean existsByHost(User host);
-
-    void deleteByGuest(User guest);
 }

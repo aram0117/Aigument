@@ -1,6 +1,6 @@
 package com.example.aigument.domain.user.entity;
 
-import com.example.aigument.common.enums.annotation.UserRoleValidAnnotation;
+import com.example.aigument.common.annotation.UserRoleValidAnnotation;
 import com.example.aigument.common.enums.UserRole;
 import com.example.aigument.domain.user.dto.request.UpdateUserRequest;
 import jakarta.persistence.*;
@@ -48,7 +48,7 @@ public class User {
     private UserStats userStats;
 
     @Builder
-    public User(String nickName, String email, String password, String phoneNumber, String provider, String providerId, UserRole role,  UserStats userStats) {
+    public User(String nickName, String email, String password, String phoneNumber, String provider, String providerId, UserRole role) {
         this.nickName = nickName;
         this.email = email;
         this.password = password;
