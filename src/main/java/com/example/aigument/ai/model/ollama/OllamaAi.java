@@ -22,13 +22,19 @@ public class OllamaAi {
 
     private final WebClient webClient;
 
+    @Value("${ai.model.name}")
+    private String model;
+
+    @Value("${ai.model.ttl}")
+    private long minutes;
+
     public OllamaAi(@Value("${ollama.base.url}") String baseUrl) {
 
         this.webClient = WebClient.builder()
                 .baseUrl(baseUrl)
                 .clientConnector(new ReactorClientHttpConnector(
                         HttpClient.create()
-                                .responseTimeout(Duration.ofSeconds(60)) // 최대 60초 대기
+                                .responseTimeout(Duration.ofMinutes(minutes))
                 ))
                 .build();
     }
@@ -36,10 +42,11 @@ public class OllamaAi {
     public Mono<String> askOllama3(String prompt) {
 
         Map<String, Object> requestBody = Map.of(
-                "model", "llama3",
+                "model", model,
                 "prompt", prompt,
                 "stream", false,
-                "format", "json"
+                "format", "json",
+                "keep_alive", "1h"
         );
 
         return webClient.post()
