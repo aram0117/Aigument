@@ -57,7 +57,8 @@ services:
 
       # [AI Engine Configuration]
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL}
-      AI_ENGINE_URL: ${AI_ENGINE_URL}
+      AI_MODEL_NAME: judge-llama3
+      AI_MODEL_TTL: 3
 
       # [Security & OAuth2]
       JWT_SECRET: ${JWT_SECRET}
@@ -86,37 +87,23 @@ services:
   # 3. AI Layer
   # ----------------------------------------------------------------------------
   ai-engine:
-    image: ollama/ollama:latest
+    build:
+      context: ./ollama
+      dockerfile: Dockerfile
     container_name: aigument-ai
     restart: unless-stopped
+    expose:
+      - "11434"
     environment:
       - OLLAMA_HOST=0.0.0.0
       - OLLAMA_ORIGINS=*
-    volumes:
-      - ./ollama_data:/root/.ollama
     networks:
       - aigument-network
     healthcheck:
       test: [ "CMD", "ollama", "list" ]
       interval: 10s
       timeout: 5s
-      retries: 10
-
-  ai-engine-init:
-    image: ollama/ollama:latest
-    container_name: aigument-ai-init
-    # 이 컨테이너는 1회성 작업(Job)이므로 restart 정책을 적용하지 않음
-    depends_on:
-      ai-engine:
-        condition: service_healthy
-    environment:
-      - OLLAMA_HOST=ai-engine:11434
-    networks:
-      - aigument-network
-    entrypoint: >
-      sh -c "echo '[Init] Pulling Llama3 model...' && 
-             ollama pull llama3 && 
-             echo '[Init] Model pull complete!'"
+      retries: 5
 
   # ----------------------------------------------------------------------------
   # 4. Data Layer

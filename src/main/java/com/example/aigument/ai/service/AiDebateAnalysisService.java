@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -27,18 +28,24 @@ public class AiDebateAnalysisService {
     private final OllamaAi ollamaAi;
     private final UserStatsService userStatsService;
     private final ObjectMapper objectMapper;
+    private static final String ANALYZING = "AI 분석 중";
 
+
+    @Transactional
     public void analyzeDebate(Long chatRoomId) {
 
         String channel = CHATROOM_LOG_NAME.getPrefix() + chatRoomId;
+
+        // 프론트엔드에 '분석 중' 상태 알림
+        redissonClient.getTopic(channel).publish(ANALYZING);
+
         List<String> messages = redisTemplate.opsForList().range(channel, 0, -1);
 
         if (messages == null || messages.isEmpty()) {
             throw new CustomException(EMPTY_CHAT_LOG);
         }
 
-        String fullChatLog = String.join("\n", messages);
-        String prompt = createPrompt(fullChatLog);
+        String prompt = String.join("\n", messages);
 
         log.info("[AiAnalysisService] 토론 분석 시작 - ChatRoomId: {}", chatRoomId);
 
@@ -52,21 +59,6 @@ public class AiDebateAnalysisService {
                 );
     }
 
-    private String createPrompt(String fullChatLog) {
-        return String.format(
-                """
-                        당신은 전문 토론 판정관입니다.
-                        토론 로그를 확인하여 더 논리적이고 합리적인 의견을 제시한 유저를 승자로 선언하고 이유를 설명하세요.
-                        응답은 반드시 지정한 결과 형식과 한국어로 답변 해주세요.
-                        
-                        ### 토론 로그 ###
-                        %s
-                        
-                        ### 결과 형식 ###
-                        {"winner": "유저ID", "loser": "유저ID", "reason": "승리 이유"}""",
-                fullChatLog
-        );
-    }
 
     private void handleAiSuccess(String result, String channel) {
 
@@ -81,7 +73,7 @@ public class AiDebateAnalysisService {
             userStatsService.incrementStatsCount(winner, loser);
 
             String msg = String.format(
-                    "ai 분석이 완료되었습니다.\n\n[winner]\n유저:%s\n\n[이유]\n%s",
+                    "ai 분석이 완료되었습니다.\n\n[winner]%s\n\n[이유]\n%s",
                     winner, reason
             );
 
@@ -89,8 +81,7 @@ public class AiDebateAnalysisService {
             log.info("[AiAnalysisService] 분석 완료 퍼블리싱 성공 - Channel: {}", channel);
 
         } catch (Exception e) {
-            // AI가 JSON 형식을 지키지 않고 잡설을 덧붙인 경우 파싱 에러 발생 가능
-            log.error("[AiAnalysisService] AI 응답 파싱 실패. 원본 응답: {}", result, e);
+            log.error("[AiAnalysisService] AI 응답 실패. 원본 응답: {}", result, e);
             handleAiError(new CustomException(AI_ANALYSIS_FAILED), channel);
         }
     }
