@@ -18,7 +18,7 @@ import org.springframework.util.StringUtils;
 import java.util.Optional;
 
 import static com.example.aigument.common.exception.ErrorCode.*;
-import static com.example.aigument.common.infra.redis.enums.RedisPrefix.SMS_AUTH_PREFIX;
+import static com.example.aigument.common.infra.redis.RedisKeys.smsAuth;
 
 @Service
 @RequiredArgsConstructor
@@ -49,8 +49,8 @@ public class UserService {
         // 비밀번호 확인 절차
         verifyPassword(request.getAuthPassword(), foundUser.getPassword());
 
-        // 중복 검증
-        duplicationCheck(request.getNickName(), request.getEmail());
+        // 중복 검증 (본인 제외)
+        duplicationCheck(foundUser.getId(), request.getNickName(), request.getEmail());
 
         // 사용자 정보 부분 수정
         foundUser.patchUpdate(request);
@@ -86,26 +86,22 @@ public class UserService {
         }
     }
 
-    private void duplicationCheck(String requestNickName, String requestEmail) {
+    private void duplicationCheck(Long userId, String requestNickName, String requestEmail) {
 
-        // 요청 닉네임 인자가 null, 공백, 빈 문자열이 아닐 경우 조회 실행
-        if (StringUtils.hasText(requestNickName)) {
-            if (!userRepository.existsByNickName(requestNickName)) {
-                throw new CustomException(NICKNAME_ALREADY_EXISTS);
-            }
+        if (StringUtils.hasText(requestNickName)
+                && userRepository.existsByNickNameAndIdNot(requestNickName, userId)) {
+            throw new CustomException(NICKNAME_ALREADY_EXISTS);
         }
 
-        // 요청 이메일 인자가 null, 공백, 빈 문자열이 아닐 경우 조회 실행
-        if (StringUtils.hasText(requestEmail)) {
-            if (!userRepository.existsByEmail(requestEmail)) {
-                throw new CustomException(EMAIL_ALREADY_EXISTS);
-            }
+        if (StringUtils.hasText(requestEmail)
+                && userRepository.existsByEmailAndIdNot(requestEmail, userId)) {
+            throw new CustomException(EMAIL_ALREADY_EXISTS);
         }
     }
 
     private void validateVerificationCode(String phoneNumber, String inputCode) {
 
-        String redisKey = SMS_AUTH_PREFIX.getPrefix() + phoneNumber;
+        String redisKey = smsAuth(phoneNumber);
         String verificationCode = redisTemplate.opsForValue().get(redisKey);
 
         // 계정에 등록된 휴대폰 번호로 인증 코드 요청을 하지 않을 때 (verificationCode -> null)
