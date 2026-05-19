@@ -45,7 +45,15 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests((authorize) -> authorize
-                        .requestMatchers("/api/auth/signup", "/api/auth/login", "/api/**").permitAll()
+                        // 인증 없이 허용: 회원가입·로그인·SMS 인증·OAuth2
+                        .requestMatchers(
+                                "/api/auth/signup",
+                                "/api/auth/login",
+                                "/api/auth/login/oauth2/**",
+                                "/api/sms/**",
+                                "/oauth2/**"
+                        ).permitAll()
+                        // STOMP: CONNECT 시 StompInterceptor에서 JWT 검증
                         .requestMatchers("/ws-stomp/**").permitAll()
                         .requestMatchers(
                                 "/v3/api-docs/**",
