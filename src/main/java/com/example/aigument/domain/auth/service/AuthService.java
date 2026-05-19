@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 import static com.example.aigument.common.enums.UserRole.USER;
 import static com.example.aigument.common.exception.ErrorCode.*;
 import static com.example.aigument.common.enums.ExpirationTime.*;
-import static com.example.aigument.common.infra.redis.enums.RedisPrefix.SMS_AUTH_PREFIX;
+import static com.example.aigument.common.infra.redis.RedisKeys.smsAuth;
 
 @Service
 @RequiredArgsConstructor
@@ -130,7 +130,7 @@ public class AuthService {
 
     private void validateVerificationCode(String phoneNumber, String inputCode) {
 
-        String redisKey = SMS_AUTH_PREFIX.getPrefix() + phoneNumber;
+        String redisKey = smsAuth(phoneNumber);
         String verificationCode = redisTemplate.opsForValue().get(redisKey);
 
         // 인증코드를 받은 휴대폰 번호로 인증코드를 입력하지 않았을 경우 (verificationCode -> null)

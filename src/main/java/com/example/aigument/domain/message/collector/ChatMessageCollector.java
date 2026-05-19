@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
 
-import static com.example.aigument.common.infra.redis.enums.RedisPrefix.CHATROOM_LOG_NAME;
+import com.example.aigument.common.infra.redis.RedisKeys;
 
 @Component
 @RequiredArgsConstructor
@@ -17,7 +17,7 @@ public class ChatMessageCollector {
     // 메시지 수집
     public void collect(Long chatRoomId, Long senderId, String message) {
 
-        String key = CHATROOM_LOG_NAME.getPrefix() + chatRoomId;
+        String key = RedisKeys.chatRoomLog(chatRoomId);
 
         String log = String.format("[유저%s] %s", senderId, message);
 

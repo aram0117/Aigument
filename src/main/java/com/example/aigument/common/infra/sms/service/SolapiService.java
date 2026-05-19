@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 import java.util.concurrent.TimeUnit;
 
 import static com.example.aigument.common.exception.ErrorCode.SMS_SEND_FAILED;
-import static com.example.aigument.common.infra.redis.enums.RedisPrefix.SMS_AUTH_PREFIX;
+import static com.example.aigument.common.infra.redis.RedisKeys.smsAuth;
 
 @Slf4j
 @Service
@@ -60,7 +60,7 @@ public class SolapiService {
         sendSms(targetNumber, verificationCode);
 
         // Redis 저장 (Key 일관성 유지)
-        String redisKey = SMS_AUTH_PREFIX.getPrefix() + targetNumber;
+        String redisKey = smsAuth(targetNumber);
         redisTemplate.opsForValue().set(redisKey, verificationCode, AUTH_CODE_TTL_MINUTES, TimeUnit.MINUTES);
     }
 

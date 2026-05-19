@@ -7,7 +7,7 @@ import org.redisson.api.RedissonClient;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Component;
 
-import static com.example.aigument.common.infra.redis.enums.RedisPrefix.CHATROOM_PATTEN_NAME;
+import com.example.aigument.common.infra.redis.RedisKeys;
 
 @Component
 @RequiredArgsConstructor
@@ -21,7 +21,7 @@ public class ChatRoomSubscriber {
     @PostConstruct
     public void init() {
 
-        String patternTopic = CHATROOM_PATTEN_NAME.getPrefix();
+        String patternTopic = RedisKeys.chatRoomPattern();
         RPatternTopic topic = redissonClient.getPatternTopic(patternTopic);
 
 

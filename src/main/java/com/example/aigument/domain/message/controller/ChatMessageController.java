@@ -19,7 +19,7 @@ import org.springframework.stereotype.Controller;
 import java.time.Clock;
 import java.time.LocalDateTime;
 
-import static com.example.aigument.common.infra.redis.enums.RedisPrefix.CHATROOM_TOPIC_NAME;
+import com.example.aigument.common.infra.redis.RedisKeys;
 
 @Tag(name = "chat_message", description = "채팅 메시지 api")
 @Controller
@@ -45,7 +45,7 @@ public class ChatMessageController {
         // 전송한 메시지를 수집
         chatMessageCollector.collect(response.getChatRoomId(), response.getSenderId(), response.getMessage());
 
-        String channel = CHATROOM_TOPIC_NAME.getPrefix() + chatRoomId;
+        String channel = RedisKeys.chatRoomTopic(chatRoomId);
 
         RTopic topic = redissonClient.getTopic(channel);
 

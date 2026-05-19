@@ -7,11 +7,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum RedisPrefix {
 
-    CHATROOM_TOPIC_NAME("chat:room:topic:"),
-    CHATROOM_LOG_NAME("chat:room:log:"),
-    CHATROOM_PATTEN_NAME("chat:room:*"),
+    CHATROOM_TOPIC("chat:room:topic:"),
+    CHATROOM_LOG("chat:room:log:"),
+    CHATROOM_PATTERN("chat:room:*"),
 
-    SMS_AUTH_PREFIX("sms:auth:")
+    SMS_AUTH("sms:auth:")
     ;
 
     private final String prefix;

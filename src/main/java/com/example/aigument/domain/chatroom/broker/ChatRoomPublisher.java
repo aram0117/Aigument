@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
-import static com.example.aigument.common.infra.redis.enums.RedisPrefix.CHATROOM_TOPIC_NAME;
+import com.example.aigument.common.infra.redis.RedisKeys;
 
 @Async("chatRoomAsyncExecutor")
 @Component
@@ -30,7 +30,7 @@ public class ChatRoomPublisher {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void chatStartEventPublish(ChatStartEvent event) {
 
-        String channel = CHATROOM_TOPIC_NAME.getPrefix() + event.getChatRoomId();
+        String channel = RedisKeys.chatRoomTopic(event.getChatRoomId());
 
         RTopic topic = redissonClient.getTopic(channel);
 
