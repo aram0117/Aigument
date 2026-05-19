@@ -21,15 +21,14 @@ import static com.example.aigument.common.exception.ErrorCode.AI_RESPONSE_TIMEOU
 public class OllamaAi {
 
     private final WebClient webClient;
+    private final String model;
 
-    @Value("${ai.model.name}")
-    private String model;
-
-    @Value("${ai.model.ttl}")
-    private long minutes;
-
-    public OllamaAi(@Value("${ollama.base.url}") String baseUrl) {
-
+    public OllamaAi(
+            @Value("${ollama.base.url}") String baseUrl,
+            @Value("${ai.model.name}") String model,
+            @Value("${ai.model.ttl}") long minutes
+    ) {
+        this.model = model;
         this.webClient = WebClient.builder()
                 .baseUrl(baseUrl)
                 .clientConnector(new ReactorClientHttpConnector(
