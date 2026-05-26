@@ -87,9 +87,7 @@ services:
   # 3. AI Layer
   # ----------------------------------------------------------------------------
   ai-engine:
-    build:
-      context: ./ollama
-      dockerfile: Dockerfile
+    image: ollama/ollama:latest
     container_name: aigument-ai
     restart: unless-stopped
     expose:
@@ -97,6 +95,18 @@ services:
     environment:
       - OLLAMA_HOST=0.0.0.0
       - OLLAMA_ORIGINS=*
+    # 미리 로컬에 받아둔 ollama model 파일 복사
+    volumes:
+      - ./ollama/model:/root/.ollama
+      - ./ollama/Modelfile:/Modelfile
+    # GPU 자원 할당
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
     networks:
       - aigument-network
     healthcheck:
@@ -122,7 +132,7 @@ services:
     networks:
       - aigument-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD}"]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD}" ]
       interval: 10s
       timeout: 5s
       retries: 5
