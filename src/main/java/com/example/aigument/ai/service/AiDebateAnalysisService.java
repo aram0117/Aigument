@@ -4,6 +4,7 @@ import com.example.aigument.ai.model.ollama.OllamaAi;
 import com.example.aigument.common.exception.CustomException;
 import com.example.aigument.common.infra.redis.RedisKeys;
 import com.example.aigument.domain.user.service.UserStatsService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -62,9 +63,9 @@ public class AiDebateAnalysisService {
         try {
             JsonNode jsonNode = objectMapper.readTree(result);
 
-            String winner = jsonNode.path("winner").asText("승자 판독 불가");
-            String loser = jsonNode.path("loser").asText("패자 판독 불가");
-            String reason = jsonNode.path("reason").asText("승자의 근거가 더 타당하다고 판단하였습니다.");
+            String winner = jsonNode.get("winner").toString();
+            String loser = jsonNode.get("loser").toString();
+            String reason = jsonNode.get("reason").toString();
 
             userStatsService.incrementStatsCount(winner, loser);
 
@@ -77,7 +78,7 @@ public class AiDebateAnalysisService {
             log.info("[AiAnalysisService] 분석 완료 퍼블리싱 성공 - Channel: {}", topicChannel);
 
         } catch (Exception e) {
-            log.error("[AiAnalysisService] AI 응답 실패. 원본 응답: {}", result, e);
+            log.error("[AiAnalysisService] AI 응답 실패 (예상 응답 형식 - {\"winner\": \"유저ID\", \"loser\": \"유저ID\", \"reason\": \"승리 이유 요약\"}) \n 원본 응답: {}", result, e);
             handleAiError(new CustomException(AI_ANALYSIS_FAILED), topicChannel);
         }
     }
