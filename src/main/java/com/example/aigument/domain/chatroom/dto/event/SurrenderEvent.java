@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChatRoomExitAndRemoveEvent {
+public class SurrenderEvent {
 
     private Long ChatRoomId;
-    private Long hostId;
+    private Long userId;
 }

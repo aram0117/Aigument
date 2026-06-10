@@ -56,8 +56,4 @@ public class ChatRoom {
     public boolean isGuest(Long authUserId) {
         return this.guest != null && this.guest.getId().equals(authUserId);
     }
-
-    public void removeGuest() {
-        this.guest = null;
-    }
 }

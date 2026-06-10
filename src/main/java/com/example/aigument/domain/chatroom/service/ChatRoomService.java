@@ -2,8 +2,7 @@ package com.example.aigument.domain.chatroom.service;
 
 import com.example.aigument.common.exception.CustomException;
 import com.example.aigument.domain.auth.dto.AuthUser;
-import com.example.aigument.domain.chatroom.dto.event.ChatRoomExitAndRemoveEvent;
-import com.example.aigument.domain.chatroom.dto.event.GuestExitEvent;
+import com.example.aigument.domain.chatroom.dto.event.SurrenderEvent;
 import com.example.aigument.domain.chatroom.dto.request.CreateChatRoomRequest;
 import com.example.aigument.domain.chatroom.dto.response.CreateChatRoomResponse;
 import com.example.aigument.domain.chatroom.dto.response.EnterChatRoomResponse;
@@ -14,6 +13,7 @@ import com.example.aigument.domain.chatroom.repository.ChatRoomRepository;
 import com.example.aigument.domain.chatroom.dto.event.ChatStartEvent;
 import com.example.aigument.domain.user.entity.User;
 import com.example.aigument.domain.user.repository.UserRepository;
+import com.example.aigument.domain.user.service.UserStatsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -30,6 +30,7 @@ public class ChatRoomService {
     private final UserRepository userRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final UserStatsService userStatsService;
 
     @Transactional
     public CreateChatRoomResponse saveChatRoom(AuthUser authUser, CreateChatRoomRequest request) {
@@ -101,17 +102,17 @@ public class ChatRoomService {
     }
 
 
-    // 채팅방 나가기 처리
+    // 채팅방 나가기 처리 (항복 선언)
     @Transactional
     public void handleChatRoomExit(Long id, AuthUser authUser) {
 
         ChatRoom foundChatRoom = chatRoomRepository.findById(id)
                 .orElseThrow(() -> new CustomException(NOT_FOUND_CHATROOM));
 
-        // 인증 유저가 게스트 일 때
+        // 채팅방 게스트 존재 여부 (클라이언트 == 게스트)
         if (foundChatRoom.isGuest(authUser.getId())) {
 
-            handleGuestExit(foundChatRoom);
+            isSurrender(foundChatRoom, authUser.getId());
 
             return;
         }
@@ -119,28 +120,17 @@ public class ChatRoomService {
         // 유저(host)의 채팅방 존재 여부 검증
         validateChatRoomUser(foundChatRoom.getHost().getId(), authUser.getId());
 
-        ChatRoomExitAndRemoveEvent event = new ChatRoomExitAndRemoveEvent(foundChatRoom.getId(), foundChatRoom.getHost().getId());
+        // 게스트가 존재하지 않으면 단순 삭제 처리
+        if (foundChatRoom.getGuest() == null) {
 
-        // 채팅방 퇴장 후 삭제 이벤트 발행
-        eventPublisher.publishEvent(event);
+            chatRoomRepository.delete(foundChatRoom);
 
-        // 채팅방 삭제
-        chatRoomRepository.delete(foundChatRoom);
+            return;  // isSurrender 호출하지 않음
+
+        }
+
+        isSurrender(foundChatRoom, authUser.getId());
     }
-
-
-    // 게스트 나가기 처리
-    private void handleGuestExit(ChatRoom foundChatRoom) {
-
-        GuestExitEvent event = new GuestExitEvent(foundChatRoom.getId(), foundChatRoom.getHost().getId(), foundChatRoom.getGuest().getId());
-
-        // 게스트 퇴장 이벤트 발행
-        eventPublisher.publishEvent(event);
-
-        // 조회한 채팅방 게스트 삭제
-        foundChatRoom.removeGuest();
-    }
-
 
 
     /**
@@ -172,5 +162,18 @@ public class ChatRoomService {
         if (!hostId.equals(authUserId)) {
             throw new CustomException(NOT_FOUND_USER_IN_CHATROOM);
         }
+    }
+
+    // 항복 선언 -> 패배 처리 -> 삭제
+    private void isSurrender(ChatRoom chatRoom, Long userId) {
+
+        SurrenderEvent event = new SurrenderEvent(chatRoom.getId(), userId);
+
+        eventPublisher.publishEvent(event);
+
+        userStatsService.getOrCreateUserStats(userId)
+                .incrementLossCount();
+
+        chatRoomRepository.delete(chatRoom);
     }
 }

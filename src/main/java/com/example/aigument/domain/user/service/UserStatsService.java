@@ -51,7 +51,7 @@ public class UserStatsService {
     /**
      * user_stats 속성이 존재하면 가져오고 존재하지 않으면 생성
      */
-    private UserStats getOrCreateUserStats(Long userId) {
+    public UserStats getOrCreateUserStats(Long userId) {
 
         return userStatsRepository.findByUserId(userId)
                 .orElseGet(() -> {
