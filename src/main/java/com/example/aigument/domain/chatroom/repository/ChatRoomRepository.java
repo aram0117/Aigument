@@ -23,6 +23,4 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
     List<ChatRoom> findAll();
 
     boolean existsByHost(User host);
-
-    boolean existsByGuest(User user);
 }
