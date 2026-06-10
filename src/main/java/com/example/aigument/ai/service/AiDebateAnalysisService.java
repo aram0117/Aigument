@@ -4,7 +4,6 @@ import com.example.aigument.ai.model.ollama.OllamaAi;
 import com.example.aigument.common.exception.CustomException;
 import com.example.aigument.common.infra.redis.RedisKeys;
 import com.example.aigument.domain.user.service.UserStatsService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -52,13 +51,13 @@ public class AiDebateAnalysisService {
 
         ollamaAi.askOllama3(prompt)
                 .subscribe(
-                        result -> handleAiSuccess(result, topicChannel),
+                        result -> handleAiSuccess(result, topicChannel, logKey),
                         error -> handleAiError(error, topicChannel)
                 );
     }
 
 
-    private void handleAiSuccess(String result, String topicChannel) {
+    private void handleAiSuccess(String result, String topicChannel, String logKey) {
 
         try {
             JsonNode jsonNode = objectMapper.readTree(result);
@@ -76,6 +75,8 @@ public class AiDebateAnalysisService {
 
             redissonClient.getTopic(topicChannel).publish(msg);
             log.info("[AiAnalysisService] 분석 완료 퍼블리싱 성공 - Channel: {}", topicChannel);
+
+            redisTemplate.delete(logKey);
 
         } catch (Exception e) {
             log.error("[AiAnalysisService] AI 응답 실패 (예상 응답 형식 - {\"winner\": \"유저ID\", \"loser\": \"유저ID\", \"reason\": \"승리 이유 요약\"}) \n 원본 응답: {}", result, e);
