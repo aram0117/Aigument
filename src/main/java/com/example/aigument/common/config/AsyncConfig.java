@@ -20,4 +20,15 @@ public class AsyncConfig {
         executor.initialize();
         return executor;
     }
+
+    @Bean(name = "chatRoomSessionAsyncExecutor")
+    public Executor chatRoomSessionAsyncExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(10);        // 기본 스레드 수
+        executor.setMaxPoolSize(20);        // 최대 스레드 수
+        executor.setQueueCapacity(500);     // 대기 큐 크기
+        executor.setThreadNamePrefix("chatRoomSessionAsync-"); // 로그에서 확인할 스레드 이름 접두사
+        executor.initialize();
+        return executor;
+    }
 }

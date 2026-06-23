@@ -5,10 +5,13 @@ import com.example.aigument.common.infra.websocket.intersepter.StompInterceptor;
 import com.example.aigument.common.infra.websocket.resolver.StompPrincipalArgumentResolver;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
@@ -27,13 +30,19 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private final StompErrorHandler stompErrorHandler;
     private final StompPrincipalArgumentResolver stompPrincipalArgumentResolver;
 
+    public static long[] HEART_BEATS = {10000, 20000};
+
+
     /**
-     * websocket 구독, 발행 경로 설정
+     * websocket 구독, 발행 경로 설정'
+     * heartbeat 설정으로 좀비 세션 방지
      */
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
 
-        config.enableSimpleBroker("/sub", "/user");
+        config.enableSimpleBroker("/sub", "/user")
+                .setTaskScheduler(heartbeatScheduler())
+                .setHeartbeatValue(HEART_BEATS);
         config.setApplicationDestinationPrefixes("/app");
     }
 
@@ -61,5 +70,15 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
         argumentResolvers.add(stompPrincipalArgumentResolver);
+    }
+
+
+    // 하트비트를 주기적으로 실행하기 위한 스레드 풀 설정
+    @Bean
+    public TaskScheduler heartbeatScheduler() {
+        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+        scheduler.setPoolSize(1);
+        scheduler.setThreadNamePrefix("wss-heartbeat-");
+        return scheduler;
     }
 }
