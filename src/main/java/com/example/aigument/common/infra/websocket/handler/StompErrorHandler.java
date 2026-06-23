@@ -1,6 +1,6 @@
 package com.example.aigument.common.infra.websocket.handler;
 
-import com.example.aigument.common.exception.StompAuthException;
+import com.example.aigument.common.exception.StompException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
@@ -32,9 +32,9 @@ public class StompErrorHandler extends StompSubProtocolErrorHandler {
         Throwable cause = e.getCause();
 
         // 직접 설계한 예외 상황 발생시
-        if (cause instanceof StompAuthException) {
+        if (cause instanceof StompException) {
 
-            return handleAuthException(cause);
+            return handleStompException(cause);
         }
 
         // 그 외 에외 상황은 부모로 넘김
@@ -42,7 +42,7 @@ public class StompErrorHandler extends StompSubProtocolErrorHandler {
     }
 
 
-    private Message<byte[]> handleAuthException (Throwable e) {
+    private Message<byte[]> handleStompException (Throwable e) {
 
         // 에러 프레임 생성
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.ERROR);

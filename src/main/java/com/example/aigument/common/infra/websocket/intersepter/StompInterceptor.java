@@ -1,6 +1,6 @@
 package com.example.aigument.common.infra.websocket.intersepter;
 
-import com.example.aigument.common.exception.StompAuthException;
+import com.example.aigument.common.exception.StompException;
 import com.example.aigument.common.security.oauth2.converter.CustomAuthenticationConverter;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
@@ -57,10 +57,10 @@ public class StompInterceptor implements ChannelInterceptor {
                     return MessageBuilder.createMessage(message.getPayload(), accessor.getMessageHeaders());
 
                 } catch (JwtException e) {
-                    throw new StompAuthException(STOMP_INVALID_TOKEN);
+                    throw new StompException(STOMP_INVALID_TOKEN);
                 }
             } else {
-                throw new StompAuthException(STOMP_MISSING_AUTH);
+                throw new StompException(STOMP_MISSING_AUTH);
             }
         }
 
