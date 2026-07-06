@@ -1,6 +1,7 @@
 package com.example.aigument.common.infra.websocket.resolver;
 
 import com.example.aigument.common.annotation.StompUser;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
@@ -10,6 +11,7 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 public class StompPrincipalArgumentResolver implements HandlerMethodArgumentResolver {
 
@@ -26,6 +28,7 @@ public class StompPrincipalArgumentResolver implements HandlerMethodArgumentReso
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
         if (accessor == null || accessor.getUser() == null) {
+            log.error("[StompPrincipalArgumentResolver] 스톰프 세션에 인증된 유저가 존재하지 않음");
             throw new RuntimeException("스톰프 세션에 인증된 유저가 존재하지 않습니다.");
         }
 

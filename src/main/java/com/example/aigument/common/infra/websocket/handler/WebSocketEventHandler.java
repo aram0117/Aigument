@@ -44,10 +44,10 @@ public class WebSocketEventHandler {
 
             sessionRoomMap.put(sessionId, chatRoomId);
 
-            log.info("[WebSocket Subscribe] 세션 입장 매핑 완료 - Session: {}, Room: {}", sessionId, chatRoomId);
+            log.info("[WebSocketEventHandler] 세션 입장 매핑 완료 - Session: {}, Room: {}", sessionId, chatRoomId);
 
         } catch (NumberFormatException e) {
-            log.error("[WebSocket Subscribe] 채팅방 ID 파싱 실패: {}", destination, e);
+            log.error("[WebSocketEventHandler] 채팅방 ID 파싱 실패: {}", destination, e);
         }
     }
 
@@ -60,22 +60,22 @@ public class WebSocketEventHandler {
 
         Long chatRoomId = sessionRoomMap.remove(sessionId);
 
-        // 구독 정보가 없으면 즉시 종료
+        // 구독 정보가 없으면 즉시 종료 (채팅방에 입장하지 않은 정상적인 연결 종료)
         if (chatRoomId == null) {
-            log.warn("[WebSocket Disconnect] 매핑된 방 정보가 없는 세션 종료: {}", sessionId);
+            log.info("[WebSocketEventHandler] 매핑된 방 정보가 없는 세션 종료 - Session: {}", sessionId);
             return;
         }
 
         AuthUser authUser = extractAuthUser(accessor);
 
-        // 인증 정보가 없으면 즉시 종료
+        // 구독된 세션인데 인증 정보가 없으면 비정상 상태로 간주
         if (authUser == null) {
-            log.warn("[WebSocket Disconnect] 인증 정보를 찾을 수 없는 세션 종료: {}", sessionId);
+            log.error("[WebSocketEventHandler] 구독된 세션에서 인증 정보를 찾을 수 없음 - Session: {}, Room: {}", sessionId, chatRoomId);
             return;
         }
 
         // 유저 나가기 처리
-        log.info("[WebSocket Disconnect] 비정상 종료 감지: 유저 {} 가 방 {} 에서 퇴장", authUser.getId(), chatRoomId);
+        log.info("[WebSocketEventHandler] 비정상 종료 감지: 유저 {} 가 방 {} 에서 퇴장", authUser.getId(), chatRoomId);
         chatRoomService.handleChatRoomExit(chatRoomId, authUser);
     }
 

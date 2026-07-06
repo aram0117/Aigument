@@ -3,6 +3,7 @@ package com.example.aigument.common.security.oauth2.repository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
@@ -14,6 +15,7 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Optional;
 
+@Slf4j
 @Component
 public class HttpCookieOAuth2AuthorizationRequestRepository
         implements AuthorizationRequestRepository<OAuth2AuthorizationRequest> {
@@ -129,6 +131,7 @@ public class HttpCookieOAuth2AuthorizationRequestRepository
                 return (OAuth2AuthorizationRequest) objectInputStream.readObject();
             }
         } catch (Exception e) {
+            log.error("[HttpCookieOAuth2AuthorizationRequestRepository] OAuth2AuthorizationRequest 역직렬화 실패 - 쿠키 변조 또는 손상 의심: {}", e.getMessage());
             return null; // 변조되거나 오류 발생 시 무시
         }
     }

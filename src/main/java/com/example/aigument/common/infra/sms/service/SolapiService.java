@@ -89,9 +89,11 @@ public class SolapiService {
 
         try {
             messageService.send(message);
+            log.info("[SolapiService] 인증 코드 발송 성공 - 수신번호: {}", recipientNumber);
         } catch (AbstractMethodError e) {  // 응답 파싱 과정의 라이브러리 충돌 무시 (문자는 발송됨)
-            log.info("인증 코드 발송 성공");
+            log.info("[SolapiService] 인증 코드 발송 성공 (응답 파싱 라이브러리 충돌 무시) - 수신번호: {}", recipientNumber);
         } catch (SolapiMessageNotReceivedException | SolapiEmptyResponseException | SolapiUnknownException e) {
+            log.error("[SolapiService] 인증 코드 발송 실패 - 수신번호: {}, 사유: {}", recipientNumber, e.getMessage(), e);
             throw new CustomException(SMS_SEND_FAILED);
         }
     }

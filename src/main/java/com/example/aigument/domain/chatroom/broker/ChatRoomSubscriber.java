@@ -2,6 +2,7 @@ package com.example.aigument.domain.chatroom.broker;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RPatternTopic;
 import org.redisson.api.RedissonClient;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.example.aigument.common.infra.redis.RedisKeys;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class ChatRoomSubscriber {
@@ -35,6 +37,8 @@ public class ChatRoomSubscriber {
 
             messagingTemplate.convertAndSend(destination, msg); // 채팅 메시지 전송
         });
+
+        log.info("[ChatRoomSubscriber] 채팅방 패턴 구독 초기화 완료 - Pattern: {}", patternTopic);
     }
 
 

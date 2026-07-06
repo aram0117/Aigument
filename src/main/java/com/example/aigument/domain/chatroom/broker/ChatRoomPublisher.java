@@ -3,6 +3,7 @@ package com.example.aigument.domain.chatroom.broker;
 import com.example.aigument.domain.chatroom.dto.event.ChatStartEvent;
 import com.example.aigument.domain.chatroom.dto.event.SurrenderEvent;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
 import org.springframework.scheduling.annotation.Async;
@@ -12,6 +13,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 import com.example.aigument.common.infra.redis.RedisKeys;
 
+@Slf4j
 @Async("chatRoomAsyncExecutor")
 @Component
 @RequiredArgsConstructor
@@ -63,5 +65,7 @@ public class ChatRoomPublisher {
         RTopic topic = redissonClient.getTopic(channel);
 
         topic.publish(msg);
+
+        log.info("[ChatRoomPublisher] 이벤트 발행 완료 - ChatRoomId: {}, Channel: {}", chatRoomId, channel);
     }
 }

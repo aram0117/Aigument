@@ -9,7 +9,9 @@ import com.example.aigument.domain.auth.dto.response.TokenResponse;
 import com.example.aigument.domain.auth.dto.response.SignupResponse;
 import com.example.aigument.domain.user.entity.User;
 import com.example.aigument.domain.user.repository.UserRepository;
+import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,7 @@ import static com.example.aigument.common.exception.ErrorCode.*;
 import static com.example.aigument.common.enums.ExpirationTime.*;
 import static com.example.aigument.common.infra.redis.RedisKeys.smsAuth;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -65,6 +68,8 @@ public class AuthService {
 
         TokenResponse tokenResponse = new TokenResponse(accessToken, refreshToken);
 
+        log.info("[AuthService] 회원가입 성공 - UserId: {}, Nickname: {}", newUser.getId(), newUser.getNickName());
+
         return SignupResponse.from(userResponse, tokenResponse);
     }
 
@@ -73,9 +78,13 @@ public class AuthService {
     public TokenResponse login(LoginRequest request) {
 
         User foundUser = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new CustomException(LOGIN_FAILED)); // 이메일 검증 실패
+                .orElseThrow(() -> {
+                    log.error("[AuthService] 로그인 실패 - 존재하지 않는 이메일: {}", request.getEmail());
+                    return new CustomException(LOGIN_FAILED);
+                }); // 이메일 검증 실패
 
         if (!passwordEncoder.matches(request.getPassword(), foundUser.getPassword())) {
+            log.error("[AuthService] 로그인 실패 - 비밀번호 불일치, UserId: {}", foundUser.getId());
             throw new CustomException(LOGIN_FAILED); // 비밀번호 검증 실패
         }
 
@@ -85,6 +94,8 @@ public class AuthService {
         // 리프레쉬 토큰 발급
         String refreshToken = jwtProvider.generateToken(foundUser.getId(), foundUser.getNickName(), foundUser.getEmail(), foundUser.getRole(), foundUser.getProvider(), REFRESH_TOKEN_EXPIRATION_TIME.getExpirationTime());
 
+        log.info("[AuthService] 로그인 성공 - UserId: {}", foundUser.getId());
+
         return TokenResponse.from(accessToken, refreshToken);
     }
 
@@ -92,9 +103,9 @@ public class AuthService {
     @Transactional
     public String logout(String accessToken) {
 
-        String provider = jwtProvider.getClaims(accessToken).get("provider", String.class);
-
-        long expiration = jwtProvider.getClaims(accessToken).getExpiration().getTime();
+        Claims claims = jwtProvider.getClaims(accessToken);
+        String provider = claims.get("provider", String.class);
+        long expiration = claims.getExpiration().getTime();
 
         long now = System.currentTimeMillis();
 
@@ -105,6 +116,8 @@ public class AuthService {
         if (redisExpire > 0) {
             redisTemplate.opsForValue().set(accessToken, "logout", redisExpire, TimeUnit.MILLISECONDS);
         }
+
+        log.info("[AuthService] 로그아웃 처리 완료 - Provider: {}", provider);
 
         return logoutRedirectService.getRedirectUrl(provider);
     }

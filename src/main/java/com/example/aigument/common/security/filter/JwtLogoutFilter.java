@@ -4,6 +4,7 @@ import com.example.aigument.common.exception.CustomException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -14,6 +15,7 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import static com.example.aigument.common.exception.ErrorCode.LOGGED_OUT_TOKEN;
 
+@Slf4j
 @Component
 public class JwtLogoutFilter extends OncePerRequestFilter {
 
@@ -44,9 +46,11 @@ public class JwtLogoutFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
 
         } catch (CustomException e) {
+            log.error("[JwtLogoutFilter] 로그아웃 처리된 토큰 재사용 시도 - URI: {}", request.getRequestURI());
             // 로그아웃 에러를 가로챔
             resolver.resolveException(request, response, null, e);
         } catch (Exception e) {
+            log.error("[JwtLogoutFilter] 필터 처리 중 예상하지 못한 에러 발생 - URI: {}", request.getRequestURI(), e);
             // 모든 에러를 가로챔
             resolver.resolveException(request, response, null, e);
         }

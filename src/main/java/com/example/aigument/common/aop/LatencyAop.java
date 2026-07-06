@@ -28,7 +28,7 @@ public class LatencyAop {
         } finally {
             long elapsedMs = (System.nanoTime() - startNanos) / 1_000_000;
 
-            log.info("[Latency] {}.{} executed in {} ms",
+            log.info("[LatencyAop] {}.{} executed in {} ms",
                     joinPoint.getSignature().getDeclaringType().getSimpleName(),
                     joinPoint.getSignature().getName(),
                     elapsedMs);

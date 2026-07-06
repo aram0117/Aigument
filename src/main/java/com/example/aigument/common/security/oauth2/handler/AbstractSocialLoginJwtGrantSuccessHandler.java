@@ -9,6 +9,7 @@ import com.example.aigument.domain.user.entity.User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -21,6 +22,7 @@ import java.io.IOException;
 
 import static com.example.aigument.common.enums.ExpirationTime.*;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public abstract class AbstractSocialLoginJwtGrantSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
@@ -66,6 +68,8 @@ public abstract class AbstractSocialLoginJwtGrantSuccessHandler extends SimpleUr
 
         // 쿠키에 저장된 소셜 로그인 관련 요청 데이터 전부 삭제
         cookieRepository.removeAuthorizationRequest(request, response);
+
+        log.info("[{}] 소셜 로그인 성공 - UserId: {}, Provider: {}", getClass().getSimpleName(), foundSocialUser.getId(), provider);
 
         // 파람에 JWT 토큰을 담아 로그인 페이지로 리다이렉트
         String targetUrl = UriComponentsBuilder.fromUriString(mainPageUrl)

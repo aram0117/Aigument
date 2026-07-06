@@ -2,7 +2,9 @@ package com.example.aigument.common.infra.websocket.intersepter;
 
 import com.example.aigument.common.exception.StompException;
 import com.example.aigument.common.security.oauth2.converter.CustomAuthenticationConverter;
+import com.example.aigument.domain.auth.dto.AuthUser;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Component;
 
 import static com.example.aigument.common.exception.ErrorCode.*;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class StompInterceptor implements ChannelInterceptor {
@@ -53,13 +56,17 @@ public class StompInterceptor implements ChannelInterceptor {
 
                     accessor.setLeaveMutable(true);
 
+                    log.info("[StompInterceptor] 웹소켓 연결 인증 성공 - UserId: {}", ((AuthUser) authUser.getPrincipal()).getId());
+
                     // 메시지 객체 반환
                     return MessageBuilder.createMessage(message.getPayload(), accessor.getMessageHeaders());
 
                 } catch (JwtException e) {
+                    log.error("[StompInterceptor] 웹소켓 연결 인증 실패 - 유효하지 않은 토큰: {}", e.getMessage());
                     throw new StompException(STOMP_INVALID_TOKEN);
                 }
             } else {
+                log.error("[StompInterceptor] 웹소켓 연결 인증 실패 - Authorization 헤더 누락");
                 throw new StompException(STOMP_MISSING_AUTH);
             }
         }

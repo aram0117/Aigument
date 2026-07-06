@@ -9,6 +9,7 @@ import com.example.aigument.domain.user.entity.User;
 import com.example.aigument.domain.user.dto.response.GetUserResponse;
 import com.example.aigument.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ import java.util.Optional;
 import static com.example.aigument.common.exception.ErrorCode.*;
 import static com.example.aigument.common.infra.redis.RedisKeys.smsAuth;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -55,6 +57,8 @@ public class UserService {
         // 사용자 정보 부분 수정
         foundUser.patchUpdate(request);
 
+        log.info("[UserService] 사용자 정보 수정 완료 - UserId: {}", foundUser.getId());
+
         return UpdateUserResponse.from(foundUser);
     }
 
@@ -66,6 +70,8 @@ public class UserService {
         validateVerificationCode(foundUser.getPhoneNumber(), request.getInputCode());
 
         userRepository.deleteById(foundUser.getId());
+
+        log.info("[UserService] 회원 탈퇴 처리 완료 - UserId: {}", foundUser.getId());
     }
 
 

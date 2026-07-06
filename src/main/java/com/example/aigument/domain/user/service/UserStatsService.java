@@ -8,12 +8,14 @@ import com.example.aigument.domain.user.entity.UserStats;
 import com.example.aigument.domain.user.repository.UserRepository;
 import com.example.aigument.domain.user.repository.UserStatsRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static com.example.aigument.common.exception.ErrorCode.NOT_FOUND_USER;
 import static com.example.aigument.common.exception.ErrorCode.NOT_FOUND_USER_STATS;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserStatsService {
@@ -36,6 +38,8 @@ public class UserStatsService {
 
         winnerStats.incrementWinCount();
         loserStats.incrementLossCount();
+
+        log.info("[UserStatsService] AI 판정 전적 반영 완료 - WinnerId: {}, LoserId: {}", winnerId, loserId);
     }
 
     @Transactional(readOnly = true)

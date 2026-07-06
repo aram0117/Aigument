@@ -40,7 +40,7 @@ public class GlobalExceptionHandler {
     // 예상하지 못한 예외 처리 (500 Internal Server Error)
     @ExceptionHandler(Exception.class)
     public ResponseEntity<CommonResponse<Void>> handleException(Exception e) {
-        log.error("예상하지 못한 예외 발생: ", e);
+        log.error("[GlobalExceptionHandler] 예상하지 못한 예외 발생 - {}", e.getMessage(), e);
 
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)

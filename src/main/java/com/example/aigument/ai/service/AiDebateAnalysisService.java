@@ -47,7 +47,7 @@ public class AiDebateAnalysisService {
 
         String prompt = String.join("\n", messages);
 
-        log.info("[AiAnalysisService] 토론 분석 시작 - ChatRoomId: {}", chatRoomId);
+        log.info("[AiDebateAnalysisService] 토론 분석 시작 - ChatRoomId: {}", chatRoomId);
 
         ollamaAi.askOllama3(prompt)
                 .subscribe(
@@ -70,19 +70,19 @@ public class AiDebateAnalysisService {
             );
 
             redissonClient.getTopic(topicChannel).publish(msg);
-            log.info("[AiAnalysisService] 분석 완료 퍼블리싱 성공 - Channel: {}", topicChannel);
+            log.info("[AiDebateAnalysisService] 분석 완료 퍼블리싱 성공 - Channel: {}", topicChannel);
 
             redisTemplate.delete(logKey);
 
         } catch (Exception e) {
-            log.error("[AiAnalysisService] AI 응답 실패 (예상 응답 형식 - {\"winner\": \"유저ID\", \"loser\": \"유저ID\", \"reason\": \"승리 이유 요약\"}) \n 원본 응답: {}", result, e);
+            log.error("[AiDebateAnalysisService] AI 응답 실패 (예상 응답 형식 - {\"winner\": \"유저ID\", \"loser\": \"유저ID\", \"reason\": \"승리 이유 요약\"}) \n 원본 응답: {}", result, e);
             handleAiError(new CustomException(AI_ANALYSIS_FAILED), topicChannel);
         }
     }
 
     private void handleAiError(Throwable error, String topicChannel) {
 
-        log.error("[AiAnalysisService] 분석 프로세스 중 에러 발생 - Channel: {}", topicChannel, error);
+        log.error("[AiDebateAnalysisService] 분석 프로세스 중 에러 발생 - Channel: {}", topicChannel, error);
 
         String errorMessage = error instanceof CustomException custom
                 ? custom.getMessage()

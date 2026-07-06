@@ -55,7 +55,7 @@ public class OllamaAi {
                 .bodyToMono(Map.class)
                 .map(responseBody -> responseBody.get("response").toString())
                 // 에러 발생 시 원본 원인을 파악하기 위한 로깅
-                .doOnError(e -> log.error("[OllamaAi] API Request Failed. Cause: {}", e.getMessage()))
+                .doOnError(e -> log.error("[OllamaAi] AI 서버 요청 실패 - 원인: {}", e.getMessage()))
                 // 예외 타입에 따른 세밀한 매핑
                 .onErrorMap(TimeoutException.class, e -> new CustomException(AI_RESPONSE_TIMEOUT))
                 // CustomException이 아닌 기타 모든 에러는 통신 에러로 간주

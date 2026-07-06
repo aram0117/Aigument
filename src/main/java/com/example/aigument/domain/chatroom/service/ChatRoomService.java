@@ -15,6 +15,7 @@ import com.example.aigument.domain.user.entity.User;
 import com.example.aigument.domain.user.repository.UserRepository;
 import com.example.aigument.domain.user.service.UserStatsService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +24,7 @@ import java.util.List;
 
 import static com.example.aigument.common.exception.ErrorCode.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ChatRoomService {
@@ -46,6 +48,8 @@ public class ChatRoomService {
 
         // db 저장
         chatRoomRepository.save(newChatRoom);
+
+        log.info("[ChatRoomService] 채팅방 생성 - ChatRoomId: {}, HostId: {}", newChatRoom.getId(), foundHost.getId());
 
         return CreateChatRoomResponse.from(newChatRoom);
     }
@@ -98,6 +102,8 @@ public class ChatRoomService {
         // 채팅 시작 이벤트 발행
         eventPublisher.publishEvent(event);
 
+        log.info("[ChatRoomService] 채팅방 입장 - ChatRoomId: {}, GuestId: {}", foundChatRoom.getId(), foundGuest.getId());
+
         return EnterChatRoomResponse.from(foundChatRoom);
     }
 
@@ -124,6 +130,8 @@ public class ChatRoomService {
         if (foundChatRoom.getGuest() == null) {
 
             chatRoomRepository.delete(foundChatRoom);
+
+            log.info("[ChatRoomService] 채팅방 삭제 - ChatRoomId: {}, HostId: {} (게스트 없이 호스트 퇴장)", id, authUser.getId());
 
             return;  // isSurrender 호출하지 않음
 
@@ -175,5 +183,7 @@ public class ChatRoomService {
                 .incrementLossCount();
 
         chatRoomRepository.delete(chatRoom);
+
+        log.info("[ChatRoomService] 항복 처리 완료 - ChatRoomId: {}, UserId: {}", chatRoom.getId(), userId);
     }
 }
