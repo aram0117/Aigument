@@ -19,10 +19,10 @@ public class ChatMessageCollector {
 
         String logKey = RedisKeys.chatRoomLog(chatRoomId);
 
-        String log = String.format("[유저%s] %s", senderId, message);
+        String logEntry = String.format("[유저%s] %s", senderId, message);
 
         // 리스트 자료로 수집한 메시지 기록
-        redisTemplate.opsForList().rightPush(logKey, log);
+        redisTemplate.opsForList().rightPush(logKey, logEntry);
 
         // 만료 시간 설정
         redisTemplate.expire(logKey, 1, TimeUnit.HOURS);

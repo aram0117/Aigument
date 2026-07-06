@@ -53,7 +53,7 @@ public class OllamaAi {
                 .bodyValue(requestBody)
                 .retrieve()
                 .bodyToMono(Map.class)
-                .map(res -> res.get("response").toString())
+                .map(responseBody -> responseBody.get("response").toString())
                 // 에러 발생 시 원본 원인을 파악하기 위한 로깅
                 .doOnError(e -> log.error("[OllamaAi] API Request Failed. Cause: {}", e.getMessage()))
                 // 예외 타입에 따른 세밀한 매핑

@@ -34,14 +34,14 @@ public class SolapiService {
     @Value("${solapi.secret}")
     private String solapiApiSecretKey;
 
-    private DefaultMessageService messageService;
-
     @Value("${solapi.sender.phonenumber}")
     private String solapiSenderPhoneNumber;
 
     private final RandomCodeConfig randomCodeConfig;
 
     private final StringRedisTemplate redisTemplate;
+
+    private DefaultMessageService messageService;
 
 
     // solapi 인스턴스 초기화
@@ -80,12 +80,12 @@ public class SolapiService {
      * solapi 메시지 예제 (kotlin sdk 1.0.3 version 기준) <a href="https://solapi.com/developers/sdk/java-sendingexample">...</a>
      * sms 기능만 필요 o, solapi json 응답 필요 x
      */
-    private void sendSms(String to, String code) {
+    private void sendSms(String recipientNumber, String verificationCode) {
 
         Message message = new Message();
         message.setFrom(solapiSenderPhoneNumber); // 발신자 번호
-        message.setTo(to); // 수신자 번호
-        message.setText(String.format("[Aigument] 인증번호는 [%s]입니다.", code));
+        message.setTo(recipientNumber); // 수신자 번호
+        message.setText(String.format("[Aigument] 인증번호는 [%s]입니다.", verificationCode));
 
         try {
             messageService.send(message);

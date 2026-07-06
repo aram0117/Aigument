@@ -32,9 +32,7 @@ public class GlobalSocialLonginSuccessHandler extends SimpleUrlAuthenticationSuc
         if ("google".equals(registrationId)) {
             googleSuccessHandler.onAuthenticationSuccess(request, response, authentication);
 
-            /*
-                추후에 추가 예정
-             */
+            // TODO: 신규 소셜 로그인 제공자(카카오, 네이버 등) 추가 시 이 아래에 else if 분기를 추가한다
 
         } else {
             throw new CustomException(UNSUPPORTED_SOCIAL_PROVIDER); // 지정하지 않는 소셜 로그인 예외 처리

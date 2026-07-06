@@ -42,7 +42,7 @@ public class StompErrorHandler extends StompSubProtocolErrorHandler {
     }
 
 
-    private Message<byte[]> handleStompException (Throwable e) {
+    private Message<byte[]> handleStompException(Throwable e) {
 
         // 에러 프레임 생성
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.ERROR);
@@ -55,8 +55,8 @@ public class StompErrorHandler extends StompSubProtocolErrorHandler {
 
         try {
             payload = objectMapper.writeValueAsBytes(accessor.getMessage());
-        } catch (JsonProcessingException e2) {
-            // 직렬화 에러 발생 시 payload 공백 처리
+        } catch (JsonProcessingException serializationException) {
+            // 직렬화 실패 시 빈 payload로 대체 (에러 프레임 자체는 계속 전달)
         }
 
         return MessageBuilder.createMessage(payload, accessor.getMessageHeaders());

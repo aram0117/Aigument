@@ -112,10 +112,10 @@ public class HttpCookieOAuth2AuthorizationRequestRepository
     // --- 직렬화 로직 ---
 
     private String serialize(OAuth2AuthorizationRequest authorizationRequest) {
-        try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
-             ObjectOutputStream oos = new ObjectOutputStream(bos)) {
-            oos.writeObject(authorizationRequest);
-            return Base64.getUrlEncoder().encodeToString(bos.toByteArray());
+        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+             ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream)) {
+            objectOutputStream.writeObject(authorizationRequest);
+            return Base64.getUrlEncoder().encodeToString(byteArrayOutputStream.toByteArray());
         } catch (IOException e) {
             throw new IllegalArgumentException("OAuth2AuthorizationRequest 직렬화 실패", e);
         }
@@ -123,10 +123,10 @@ public class HttpCookieOAuth2AuthorizationRequestRepository
 
     private OAuth2AuthorizationRequest deserialize(Cookie cookie) {
         try {
-            byte[] bytes = Base64.getUrlDecoder().decode(cookie.getValue());
-            try (ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-                 ObjectInputStream ois = new ObjectInputStream(bis)) {
-                return (OAuth2AuthorizationRequest) ois.readObject();
+            byte[] decodedBytes = Base64.getUrlDecoder().decode(cookie.getValue());
+            try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(decodedBytes);
+                 ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream)) {
+                return (OAuth2AuthorizationRequest) objectInputStream.readObject();
             }
         } catch (Exception e) {
             return null; // 변조되거나 오류 발생 시 무시

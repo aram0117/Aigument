@@ -24,7 +24,7 @@ import java.util.List;
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Value("${server.url}")
-    private String severUrl;
+    private String serverUrl;
 
     private final StompInterceptor stompInterceptor;
     private final StompErrorHandler stompErrorHandler;
@@ -52,7 +52,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
      */
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws-stomp").setAllowedOrigins(severUrl).withSockJS();
+        registry.addEndpoint("/ws-stomp").setAllowedOrigins(serverUrl).withSockJS();
         registry.setErrorHandler(stompErrorHandler);
     }
 

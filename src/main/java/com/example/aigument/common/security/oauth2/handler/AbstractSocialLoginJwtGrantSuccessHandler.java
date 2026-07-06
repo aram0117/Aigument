@@ -55,7 +55,7 @@ public abstract class AbstractSocialLoginJwtGrantSuccessHandler extends SimpleUr
 
         SocialUser socialUser = new SocialUser(username, email, providerId, provider);
 
-        User foundSocialUser= socialService.getSocialUser(socialUser);
+        User foundSocialUser = socialService.getSocialUser(socialUser);
 
         // 소셜 유저 정보로 jwt 토큰 발급
         String accessToken = jwtProvider.generateToken(foundSocialUser.getId(), foundSocialUser.getNickName(), foundSocialUser.getEmail(), foundSocialUser.getRole(), foundSocialUser.getProvider(), ACCESS_TOKEN_EXPIRATION_TIME.getExpirationTime());

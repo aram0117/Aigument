@@ -14,11 +14,8 @@ import org.springframework.context.annotation.Configuration;
 public class SwaggerConfig {
 
     static {
-        // 방법 A: @AuthenticationPrincipal 어노테이션 자체를 무시하도록 설정
+        // @AuthenticationPrincipal이 붙은 파라미터(AuthUser)는 요청 바디로 문서화되지 않도록 무시
         SpringDocUtils.getConfig().addAnnotationsToIgnore(org.springframework.security.core.annotation.AuthenticationPrincipal.class);
-
-        // 방법 B: 특정 커스텀 유저 클래스를 무시하도록 설정 (AuthUser 자리에 본인 클래스명 입력)
-        // SpringDocUtils.getConfig().addRequestWrapperToIgnore(AuthUser.class);
     }
 
     @Bean

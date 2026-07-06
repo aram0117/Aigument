@@ -1,4 +1,4 @@
-package com.example.aigument.common.config; // 추천 경로
+package com.example.aigument.common.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -6,8 +6,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.context.annotation.Bean;
 import java.util.concurrent.Executor;
 
+// @Async 어노테이션을 사용하려면 @EnableAsync가 반드시 활성화되어 있어야 한다
 @Configuration
-@EnableAsync // 비동기 활성화 (필수!)
+@EnableAsync
 public class AsyncConfig {
 
     @Bean(name = "chatRoomAsyncExecutor")
