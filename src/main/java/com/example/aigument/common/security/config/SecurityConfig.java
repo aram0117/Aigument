@@ -5,6 +5,7 @@ import com.example.aigument.common.security.oauth2.converter.CustomAuthenticatio
 import com.example.aigument.common.security.oauth2.handler.GlobalSocialLonginSuccessHandler;
 import com.example.aigument.common.security.oauth2.repository.HttpCookieOAuth2AuthorizationRequestRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -20,6 +21,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -31,6 +34,10 @@ public class SecurityConfig {
     private final CustomAuthenticationConverter authenticationConverter; // 인증 객체 반환 컨버터
     private final JwtLogoutFilter jwtLogoutFilter;
     private final JwtDecoder jwtDecoder;
+
+    // 프론트엔드 허용 출처 (콤마로 다중 등록 가능, 로컬 개발 기본값 포함)
+    @Value("${cors.allowed-origins:http://localhost:3000}")
+    private String allowedOrigins;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -93,14 +100,17 @@ public class SecurityConfig {
 
     /**
      * cors 설정
-     * 모든 Origin, Method, Header 쿠키 및 자격 증명 허용
+     * 자격 증명(쿠키)을 허용하므로 Origin은 와일드카드가 아닌 허용 목록(cors.allowed-origins)만 등록한다.
      */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.addAllowedOriginPattern("*");
+        Arrays.stream(allowedOrigins.split(","))
+                .map(String::trim)
+                .filter(origin -> !origin.isEmpty())
+                .forEach(configuration::addAllowedOriginPattern);
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
         configuration.setAllowCredentials(true);

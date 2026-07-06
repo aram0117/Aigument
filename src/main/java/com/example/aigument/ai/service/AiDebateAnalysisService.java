@@ -1,10 +1,10 @@
 package com.example.aigument.ai.service;
 
 import com.example.aigument.ai.model.ollama.OllamaAi;
+import com.example.aigument.ai.model.ollama.dto.OllamaJudgementResult;
 import com.example.aigument.common.exception.CustomException;
 import com.example.aigument.common.infra.redis.RedisKeys;
 import com.example.aigument.domain.user.service.UserStatsService;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -60,17 +60,13 @@ public class AiDebateAnalysisService {
     private void handleAiSuccess(String result, String topicChannel, String logKey) {
 
         try {
-            JsonNode jsonNode = objectMapper.readTree(result);
+            OllamaJudgementResult judgement = objectMapper.readValue(result, OllamaJudgementResult.class);
 
-            String winner = jsonNode.get("winner").toString();
-            String loser = jsonNode.get("loser").toString();
-            String reason = jsonNode.get("reason").toString();
-
-            userStatsService.incrementStatsCount(winner, loser);
+            userStatsService.incrementStatsCount(judgement.winner(), judgement.loser());
 
             String msg = String.format(
                     "ai 분석이 완료되었습니다.\n\n[winner]%s\n\n[이유]\n%s",
-                    winner, reason
+                    judgement.winner(), judgement.reason()
             );
 
             redissonClient.getTopic(topicChannel).publish(msg);

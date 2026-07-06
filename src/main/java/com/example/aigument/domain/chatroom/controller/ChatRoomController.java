@@ -10,6 +10,7 @@ import com.example.aigument.domain.chatroom.dto.response.GetChatRoomResponse;
 import com.example.aigument.domain.chatroom.service.ChatRoomService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +29,7 @@ public class ChatRoomController {
 
     @Operation(summary = "채팅방 생성", description = "새로운 채팅방을 생성합니다.")
     @PostMapping
-    public ResponseEntity<CommonResponse<CreateChatRoomResponse>> createChatRoom(@AuthenticationPrincipal AuthUser authUser, @RequestBody CreateChatRoomRequest request) {
+    public ResponseEntity<CommonResponse<CreateChatRoomResponse>> createChatRoom(@AuthenticationPrincipal AuthUser authUser, @RequestBody @Valid CreateChatRoomRequest request) {
 
         CreateChatRoomResponse response = chatRoomService.saveChatRoom(authUser, request);
 
