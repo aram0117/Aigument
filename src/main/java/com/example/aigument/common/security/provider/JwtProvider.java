@@ -1,12 +1,13 @@
 package com.example.aigument.common.security.provider;
 
 import com.example.aigument.common.enums.UserRole;
+import com.example.aigument.common.properties.JwtProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -15,18 +16,19 @@ import java.util.Date;
 
 @Component
 @Getter
+@RequiredArgsConstructor
 public class JwtProvider {
 
     private final static String TOKEN_PREFIX = "Bearer ";
 
-    @Value("${jwt.secret}")
-    private String secretKeyString;
+    private final JwtProperties jwtProperties;
+
     private SecretKey secretKey;
 
     @PostConstruct
     public void init() {
 
-        byte[] keyBytes = Base64.getDecoder().decode(secretKeyString);
+        byte[] keyBytes = Base64.getDecoder().decode(jwtProperties.getSecret());
         this.secretKey = Keys.hmacShaKeyFor(keyBytes);
     }
 

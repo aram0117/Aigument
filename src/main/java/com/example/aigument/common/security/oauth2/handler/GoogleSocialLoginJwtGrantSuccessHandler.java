@@ -1,5 +1,7 @@
 package com.example.aigument.common.security.oauth2.handler;
 
+import com.example.aigument.common.properties.AppUrlProperties;
+import com.example.aigument.common.properties.JwtProperties;
 import com.example.aigument.common.security.oauth2.repository.HttpCookieOAuth2AuthorizationRequestRepository;
 import com.example.aigument.common.security.provider.JwtProvider;
 import com.example.aigument.common.security.provider.RefreshTokenCookie;
@@ -10,8 +12,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class GoogleSocialLoginJwtGrantSuccessHandler extends AbstractSocialLoginJwtGrantSuccessHandler{
 
-    public GoogleSocialLoginJwtGrantSuccessHandler(JwtProvider jwtProvider, HttpCookieOAuth2AuthorizationRequestRepository cookieRepository, SocialService socialService, RefreshTokenCookie refreshTokenCookie) {
-        super(jwtProvider, cookieRepository, socialService, refreshTokenCookie);
+    public GoogleSocialLoginJwtGrantSuccessHandler(JwtProvider jwtProvider, HttpCookieOAuth2AuthorizationRequestRepository cookieRepository, SocialService socialService, RefreshTokenCookie refreshTokenCookie, JwtProperties jwtProperties, AppUrlProperties appUrlProperties) {
+        super(jwtProvider, cookieRepository, socialService, refreshTokenCookie, jwtProperties, appUrlProperties);
     }
 
     /**

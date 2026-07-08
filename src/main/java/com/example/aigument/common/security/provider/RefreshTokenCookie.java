@@ -1,18 +1,18 @@
 package com.example.aigument.common.security.provider;
 
+import com.example.aigument.common.properties.CookieProperties;
+import com.example.aigument.common.properties.JwtProperties;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
-import static com.example.aigument.common.enums.ExpirationTime.REFRESH_TOKEN_EXPIRATION_TIME;
-
 @Component
+@RequiredArgsConstructor
 public class RefreshTokenCookie {
 
-    // 운영(HTTPS) 환경에서는 cookie.secure=true 로 재정의해야 한다. 로컬 http 개발 편의를 위해 기본값은 false.
-    @Value("${cookie.secure:false}")
-    private boolean secureCookie;
+    private final JwtProperties jwtProperties;
+    private final CookieProperties cookieProperties;
 
     /**
      * 쿠키에 저장할 리프레쉬 토큰
@@ -24,9 +24,9 @@ public class RefreshTokenCookie {
     public void setRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
         ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
-                .secure(secureCookie)
+                .secure(cookieProperties.isSecure())
                 .path("/")
-                .maxAge(REFRESH_TOKEN_EXPIRATION_TIME.getExpirationTime())
+                .maxAge(jwtProperties.getRefreshTokenExpirationTime())
                 .sameSite("Lax")
                 .build();
 
@@ -36,7 +36,7 @@ public class RefreshTokenCookie {
     public void deleteRefreshTokenCookie(HttpServletResponse response) {
         ResponseCookie cookie = ResponseCookie.from("refreshToken", "")
                 .httpOnly(true)
-                .secure(secureCookie)
+                .secure(cookieProperties.isSecure())
                 .maxAge(0) // 삭제 명령
                 .sameSite("Lax")
                 .build();

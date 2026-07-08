@@ -1,6 +1,7 @@
 package com.example.aigument.domain.auth.service;
 
 import com.example.aigument.common.exception.CustomException;
+import com.example.aigument.common.properties.JwtProperties;
 import com.example.aigument.common.security.provider.JwtProvider;
 import com.example.aigument.domain.auth.dto.response.UserResponse;
 import com.example.aigument.domain.auth.dto.request.LoginRequest;
@@ -22,7 +23,6 @@ import java.util.concurrent.TimeUnit;
 
 import static com.example.aigument.common.enums.UserRole.USER;
 import static com.example.aigument.common.exception.ErrorCode.*;
-import static com.example.aigument.common.enums.ExpirationTime.*;
 import static com.example.aigument.common.infra.redis.RedisKeys.smsAuth;
 
 @Slf4j
@@ -35,6 +35,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final StringRedisTemplate redisTemplate;
     private final LogoutRedirectService logoutRedirectService;
+    private final JwtProperties jwtProperties;
 
 
     @Transactional
@@ -61,10 +62,10 @@ public class AuthService {
         UserResponse userResponse = UserResponse.from(newUser);
 
         // 엑세스 토큰 발급
-        String accessToken = jwtProvider.generateToken(newUser.getId(), newUser.getNickName(), newUser.getEmail(), newUser.getRole(), newUser.getProvider(), ACCESS_TOKEN_EXPIRATION_TIME.getExpirationTime());
+        String accessToken = jwtProvider.generateToken(newUser.getId(), newUser.getNickName(), newUser.getEmail(), newUser.getRole(), newUser.getProvider(), jwtProperties.getAccessTokenExpirationTime());
 
         // 리프레쉬 토큰 발급
-        String refreshToken = jwtProvider.generateToken(newUser.getId(), newUser.getNickName(), newUser.getEmail(), newUser.getRole(), newUser.getProvider(), REFRESH_TOKEN_EXPIRATION_TIME.getExpirationTime());
+        String refreshToken = jwtProvider.generateToken(newUser.getId(), newUser.getNickName(), newUser.getEmail(), newUser.getRole(), newUser.getProvider(), jwtProperties.getRefreshTokenExpirationTime());
 
         TokenResponse tokenResponse = new TokenResponse(accessToken, refreshToken);
 
@@ -89,10 +90,10 @@ public class AuthService {
         }
 
         // 엑세스 토큰 발급
-        String accessToken = jwtProvider.generateToken(foundUser.getId(), foundUser.getNickName(), foundUser.getEmail(), foundUser.getRole(), foundUser.getProvider(), ACCESS_TOKEN_EXPIRATION_TIME.getExpirationTime());
+        String accessToken = jwtProvider.generateToken(foundUser.getId(), foundUser.getNickName(), foundUser.getEmail(), foundUser.getRole(), foundUser.getProvider(), jwtProperties.getAccessTokenExpirationTime());
 
         // 리프레쉬 토큰 발급
-        String refreshToken = jwtProvider.generateToken(foundUser.getId(), foundUser.getNickName(), foundUser.getEmail(), foundUser.getRole(), foundUser.getProvider(), REFRESH_TOKEN_EXPIRATION_TIME.getExpirationTime());
+        String refreshToken = jwtProvider.generateToken(foundUser.getId(), foundUser.getNickName(), foundUser.getEmail(), foundUser.getRole(), foundUser.getProvider(), jwtProperties.getRefreshTokenExpirationTime());
 
         log.info("[AuthService] 로그인 성공 - UserId: {}", foundUser.getId());
 

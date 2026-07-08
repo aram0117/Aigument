@@ -1,5 +1,7 @@
 package com.example.aigument.common.security.oauth2.handler;
 
+import com.example.aigument.common.properties.AppUrlProperties;
+import com.example.aigument.common.properties.JwtProperties;
 import com.example.aigument.common.security.oauth2.repository.HttpCookieOAuth2AuthorizationRequestRepository;
 import com.example.aigument.common.security.provider.JwtProvider;
 import com.example.aigument.common.security.provider.RefreshTokenCookie;
@@ -10,7 +12,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -20,20 +21,17 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 
-import static com.example.aigument.common.enums.ExpirationTime.*;
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public abstract class AbstractSocialLoginJwtGrantSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-    @Value("${main.page.url}")
-    private String mainPageUrl;
-
     protected final JwtProvider jwtProvider;
     protected final HttpCookieOAuth2AuthorizationRequestRepository cookieRepository;
     protected final SocialService socialService;
     protected final RefreshTokenCookie refreshTokenCookie;
+    protected final JwtProperties jwtProperties;
+    protected final AppUrlProperties appUrlProperties;
 
     /**
      * 인증된 소셜 계정 정보 ex) google,kakao,naver등
@@ -60,9 +58,9 @@ public abstract class AbstractSocialLoginJwtGrantSuccessHandler extends SimpleUr
         User foundSocialUser = socialService.getSocialUser(socialUser);
 
         // 소셜 유저 정보로 jwt 토큰 발급
-        String accessToken = jwtProvider.generateToken(foundSocialUser.getId(), foundSocialUser.getNickName(), foundSocialUser.getEmail(), foundSocialUser.getRole(), foundSocialUser.getProvider(), ACCESS_TOKEN_EXPIRATION_TIME.getExpirationTime());
+        String accessToken = jwtProvider.generateToken(foundSocialUser.getId(), foundSocialUser.getNickName(), foundSocialUser.getEmail(), foundSocialUser.getRole(), foundSocialUser.getProvider(), jwtProperties.getAccessTokenExpirationTime());
 
-        String refreshToken = jwtProvider.generateToken(foundSocialUser.getId(), foundSocialUser.getNickName(), foundSocialUser.getEmail(), foundSocialUser.getRole(), foundSocialUser.getProvider(), REFRESH_TOKEN_EXPIRATION_TIME.getExpirationTime());
+        String refreshToken = jwtProvider.generateToken(foundSocialUser.getId(), foundSocialUser.getNickName(), foundSocialUser.getEmail(), foundSocialUser.getRole(), foundSocialUser.getProvider(), jwtProperties.getRefreshTokenExpirationTime());
 
         refreshTokenCookie.setRefreshTokenCookie(response, refreshToken.substring(7).trim());
 
@@ -72,7 +70,7 @@ public abstract class AbstractSocialLoginJwtGrantSuccessHandler extends SimpleUr
         log.info("[{}] 소셜 로그인 성공 - UserId: {}, Provider: {}", getClass().getSimpleName(), foundSocialUser.getId(), provider);
 
         // 파람에 JWT 토큰을 담아 로그인 페이지로 리다이렉트
-        String targetUrl = UriComponentsBuilder.fromUriString(mainPageUrl)
+        String targetUrl = UriComponentsBuilder.fromUriString(appUrlProperties.getMainPageUrl())
                 .queryParam("token", accessToken)
                 .build().toUriString();
 

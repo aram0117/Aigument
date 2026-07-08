@@ -3,6 +3,7 @@ package com.example.aigument.common.infra.sms.service;
 import com.example.aigument.common.config.RandomCodeConfig;
 import com.example.aigument.common.exception.CustomException;
 import com.example.aigument.common.infra.sms.dto.request.AuthCodeRequest;
+import com.example.aigument.common.properties.SmsProperties;
 import com.solapi.sdk.SolapiClient;
 import com.solapi.sdk.message.exception.SolapiEmptyResponseException;
 import com.solapi.sdk.message.exception.SolapiMessageNotReceivedException;
@@ -12,7 +13,6 @@ import com.solapi.sdk.message.service.DefaultMessageService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -26,16 +26,7 @@ import static com.example.aigument.common.infra.redis.RedisKeys.smsAuth;
 @RequiredArgsConstructor
 public class SolapiService {
 
-    private static final long AUTH_CODE_TTL_MINUTES = 3L;
-
-    @Value("${solapi.key}")
-    private String solapiApiKey;
-
-    @Value("${solapi.secret}")
-    private String solapiApiSecretKey;
-
-    @Value("${solapi.sender.phonenumber}")
-    private String solapiSenderPhoneNumber;
+    private final SmsProperties smsProperties;
 
     private final RandomCodeConfig randomCodeConfig;
 
@@ -47,7 +38,7 @@ public class SolapiService {
     // solapi 인스턴스 초기화
     @PostConstruct
     public void init() {
-        this.messageService = SolapiClient.INSTANCE.createInstance(solapiApiKey, solapiApiSecretKey);
+        this.messageService = SolapiClient.INSTANCE.createInstance(smsProperties.getSolapiApiKey(), smsProperties.getSolapiApiSecretKey());
     }
 
 
@@ -61,7 +52,7 @@ public class SolapiService {
 
         // Redis 저장 (Key 일관성 유지)
         String redisKey = smsAuth(targetNumber);
-        redisTemplate.opsForValue().set(redisKey, verificationCode, AUTH_CODE_TTL_MINUTES, TimeUnit.MINUTES);
+        redisTemplate.opsForValue().set(redisKey, verificationCode, smsProperties.getAuthCodeTtlMinutes(), TimeUnit.MINUTES);
     }
 
 
@@ -83,7 +74,7 @@ public class SolapiService {
     private void sendSms(String recipientNumber, String verificationCode) {
 
         Message message = new Message();
-        message.setFrom(solapiSenderPhoneNumber); // 발신자 번호
+        message.setFrom(smsProperties.getSolapiSenderPhoneNumber()); // 발신자 번호
         message.setTo(recipientNumber); // 수신자 번호
         message.setText(String.format("[Aigument] 인증번호는 [%s]입니다.", verificationCode));
 

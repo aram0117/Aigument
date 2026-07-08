@@ -1,17 +1,22 @@
 package com.example.aigument.common.docs;
 
+import com.example.aigument.common.properties.AppUrlProperties;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
+import lombok.RequiredArgsConstructor;
 import org.springdoc.core.utils.SpringDocUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@RequiredArgsConstructor
 public class SwaggerConfig {
+
+    private final AppUrlProperties appUrlProperties;
 
     static {
         // @AuthenticationPrincipal이 붙은 파라미터(AuthUser)는 요청 바디로 문서화되지 않도록 무시
@@ -33,7 +38,7 @@ public class SwaggerConfig {
                 .components(components)
                 .info(apiInfo())
                 .addSecurityItem(securityRequirement)
-                .addServersItem(new Server().url("http://localhost").description("Docker Server"));
+                .addServersItem(new Server().url(appUrlProperties.getServerUrl()).description("Docker Server"));
     }
 
     private Info apiInfo() {

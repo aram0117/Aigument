@@ -7,12 +7,15 @@ import org.springframework.stereotype.Component;
 import java.util.concurrent.TimeUnit;
 
 import com.example.aigument.common.infra.redis.RedisKeys;
+import com.example.aigument.common.properties.RedisProperties;
 
 @Component
 @RequiredArgsConstructor
 public class ChatMessageCollector {
 
     private final StringRedisTemplate redisTemplate;
+
+    private final RedisProperties redisProperties;
 
     // 메시지 수집
     public void collect(Long chatRoomId, Long senderId, String message) {
@@ -25,6 +28,6 @@ public class ChatMessageCollector {
         redisTemplate.opsForList().rightPush(logKey, logEntry);
 
         // 만료 시간 설정
-        redisTemplate.expire(logKey, 1, TimeUnit.HOURS);
+        redisTemplate.expire(logKey, redisProperties.getChatLogTtlHours(), TimeUnit.HOURS);
     }
 }

@@ -1,5 +1,6 @@
 package com.example.aigument.common.security.provider;
 
+import com.example.aigument.common.properties.JwtProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,10 +19,11 @@ import java.time.Duration;
 public class JwtConfig {
 
     private final JwtProvider jwtProvider;
+    private final JwtProperties jwtProperties;
 
     /**
      * 시큐리티가 관리 하는 jwt의 시크릿 키 검증
-     * 시간 오차 범위 60초 설정
+     * 시간 오차 범위 설정
      */
     @Bean
     public JwtDecoder jwtDecoder() {
@@ -31,7 +33,7 @@ public class JwtConfig {
                 .build();
 
         OAuth2TokenValidator<Jwt> withClockSkew = new DelegatingOAuth2TokenValidator<>(
-                new JwtTimestampValidator(Duration.ofSeconds(60))
+                new JwtTimestampValidator(Duration.ofSeconds(jwtProperties.getClockSkewSeconds()))
         );
 
         jwtDecoder.setJwtValidator(withClockSkew);

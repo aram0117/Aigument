@@ -1,10 +1,11 @@
 package com.example.aigument.common.security.oauth2.repository;
 
+import com.example.aigument.common.properties.CookieProperties;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.stereotype.Component;
@@ -17,16 +18,15 @@ import java.util.Optional;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class HttpCookieOAuth2AuthorizationRequestRepository
         implements AuthorizationRequestRepository<OAuth2AuthorizationRequest> {
 
     public static final String OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME = "oauth2_auth_request";
     public static final String REDIRECT_URI_PARAM_COOKIE_NAME = "redirect_uri";
-    private static final int COOKIE_EXPIRE_SECONDS = 180;
 
     // 환경 변수에서 쿠키 보안 설정을 가져옴
-    @Value("${cookie.secure}")
-    private boolean cookieSecure;
+    private final CookieProperties cookieProperties;
 
     @Override
     public OAuth2AuthorizationRequest loadAuthorizationRequest(HttpServletRequest request) {
@@ -78,8 +78,8 @@ public class HttpCookieOAuth2AuthorizationRequestRepository
         Cookie cookie = new Cookie(name, value);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
-        cookie.setMaxAge(COOKIE_EXPIRE_SECONDS);
-        cookie.setSecure(cookieSecure); // 환경 변수에 따라 HTTPS 요구 여부 결정
+        cookie.setMaxAge(cookieProperties.getOauth2ExpireSeconds());
+        cookie.setSecure(cookieProperties.isSecure()); // 환경 변수에 따라 HTTPS 요구 여부 결정
 
         // 최신 브라우저를 위한 SameSite 설정
         cookie.setAttribute("SameSite", "Lax");

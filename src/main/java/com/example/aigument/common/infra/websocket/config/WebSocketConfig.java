@@ -3,8 +3,9 @@ package com.example.aigument.common.infra.websocket.config;
 import com.example.aigument.common.infra.websocket.handler.StompErrorHandler;
 import com.example.aigument.common.infra.websocket.intersepter.StompInterceptor;
 import com.example.aigument.common.infra.websocket.resolver.StompPrincipalArgumentResolver;
+import com.example.aigument.common.properties.AppUrlProperties;
+import com.example.aigument.common.properties.WebSocketHeartbeatProperties;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
@@ -23,14 +24,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    @Value("${server.url}")
-    private String serverUrl;
+    private final AppUrlProperties appUrlProperties;
+    private final WebSocketHeartbeatProperties heartbeatProperties;
 
     private final StompInterceptor stompInterceptor;
     private final StompErrorHandler stompErrorHandler;
     private final StompPrincipalArgumentResolver stompPrincipalArgumentResolver;
-
-    public static long[] HEART_BEATS = {10000, 20000};
 
 
     /**
@@ -42,7 +41,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
         config.enableSimpleBroker("/sub", "/user")
                 .setTaskScheduler(heartbeatScheduler())
-                .setHeartbeatValue(HEART_BEATS);
+                .setHeartbeatValue(new long[]{heartbeatProperties.getClientIntervalMs(), heartbeatProperties.getServerIntervalMs()});
         config.setApplicationDestinationPrefixes("/app");
     }
 
@@ -52,7 +51,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
      */
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws-stomp").setAllowedOrigins(serverUrl).withSockJS();
+        registry.addEndpoint("/ws-stomp").setAllowedOrigins(appUrlProperties.getServerUrl()).withSockJS();
         registry.setErrorHandler(stompErrorHandler);
     }
 
@@ -77,7 +76,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Bean
     public TaskScheduler heartbeatScheduler() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-        scheduler.setPoolSize(1);
+        scheduler.setPoolSize(heartbeatProperties.getSchedulerPoolSize());
         scheduler.setThreadNamePrefix("wss-heartbeat-");
         return scheduler;
     }

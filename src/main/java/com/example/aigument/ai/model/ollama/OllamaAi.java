@@ -1,8 +1,8 @@
 package com.example.aigument.ai.model.ollama;
 
 import com.example.aigument.common.exception.CustomException;
+import com.example.aigument.common.properties.AiProperties;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -22,18 +22,16 @@ public class OllamaAi {
 
     private final WebClient webClient;
     private final String model;
+    private final String keepAlive;
 
-    public OllamaAi(
-            @Value("${ollama.base.url}") String baseUrl,
-            @Value("${ai.model.name}") String model,
-            @Value("${ai.model.ttl}") long minutes
-    ) {
-        this.model = model;
+    public OllamaAi(AiProperties aiProperties) {
+        this.model = aiProperties.getModelName();
+        this.keepAlive = aiProperties.getModelKeepAlive();
         this.webClient = WebClient.builder()
-                .baseUrl(baseUrl)
+                .baseUrl(aiProperties.getOllamaBaseUrl())
                 .clientConnector(new ReactorClientHttpConnector(
                         HttpClient.create()
-                                .responseTimeout(Duration.ofMinutes(minutes))
+                                .responseTimeout(Duration.ofMinutes(aiProperties.getModelTtlMinutes()))
                 ))
                 .build();
     }
@@ -45,7 +43,7 @@ public class OllamaAi {
                 "prompt", prompt,
                 "stream", false,
                 "format", "json",
-                "keep_alive", "1h"
+                "keep_alive", keepAlive
         );
 
         return webClient.post()
