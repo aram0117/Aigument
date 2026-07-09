@@ -2,11 +2,14 @@ package com.example.aigument.domain.chatroom.entity;
 
 import com.example.aigument.common.annotation.UserRoleValidAnnotation;
 import com.example.aigument.common.enums.CategoryType;
+import com.example.aigument.common.exception.CustomException;
 import com.example.aigument.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import static com.example.aigument.common.exception.ErrorCode.AI_HALLUCINATED_PARTICIPANT;
 
 @Entity
 @Getter
@@ -51,5 +54,15 @@ public class ChatRoom {
 
     public boolean isGuest(Long authUserId) {
         return this.guest != null && this.guest.getId().equals(authUserId);
+    }
+
+    public void aiResultValidateUserInChatRoom(Long winnerId, Long loserId) {
+        if (!isParticipant(winnerId) || !isParticipant(loserId)) {
+            throw new CustomException(AI_HALLUCINATED_PARTICIPANT);
+        }
+    }
+
+    private boolean isParticipant(Long userId) {
+        return this.host.getId().equals(userId) || this.guest.getId().equals(userId);
     }
 }

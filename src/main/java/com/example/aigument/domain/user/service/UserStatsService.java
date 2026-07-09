@@ -1,5 +1,6 @@
 package com.example.aigument.domain.user.service;
 
+import com.example.aigument.common.annotation.MeasureLatency;
 import com.example.aigument.common.exception.CustomException;
 import com.example.aigument.domain.auth.dto.AuthUser;
 import com.example.aigument.domain.user.dto.response.GetUserStatsResponse;
@@ -12,23 +13,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.example.aigument.common.exception.ErrorCode.NOT_FOUND_USER;
-import static com.example.aigument.common.exception.ErrorCode.NOT_FOUND_USER_STATS;
+import static com.example.aigument.common.exception.ErrorCode.*;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@MeasureLatency
 public class UserStatsService {
 
     private final UserRepository userRepository;
     private final UserStatsRepository userStatsRepository;
 
     @Transactional
-    public void incrementStatsCount(String winner, String loser) {
-
-        // 문자열중 유저id 값만 파싱
-        Long winnerId = Long.parseLong(winner.replaceAll("[^0-9]", ""));
-        Long loserId = Long.parseLong(loser.replaceAll("[^0-9]", ""));
+    public void incrementStatsCount(Long winnerId, Long loserId) {
 
         /*
         유저의 승패 결과 반영

@@ -32,10 +32,9 @@ public enum ErrorCode {
     NOT_FOUND_USER_IN_CHATROOM(HttpStatus.FORBIDDEN, "채팅방 내에서 사용자를 찾을 수 없습니다."),
 
     // ai
-    AI_COMMUNICATION_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "AI 서버와 통신하는 중 문제가 발생했습니다."),
-    AI_RESPONSE_TIMEOUT(HttpStatus.REQUEST_TIMEOUT, "AI 분석 시간이 너무 오래 걸려 요청이 취소되었습니다."),
     EMPTY_CHAT_LOG(HttpStatus.BAD_REQUEST, "채팅 기록이 비어 있어 분석을 진행할 수 없습니다."),
-    AI_ANALYSIS_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "AI 토론 분석 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요."),
+    AI_HALLUCINATED_PARTICIPANT(HttpStatus.INTERNAL_SERVER_ERROR, "AI 분석 결과에 현재 채팅방에 존재하지 않는 사용자가 포함되어 있습니다."),
+
 
     // stomp
     STOMP_INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "스톰프 인증 토큰이 유효하지 않습니다."),
