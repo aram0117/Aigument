@@ -1,0 +1,138 @@
+{
+  "title": "Aigument - JVM & HTTP Metrics",
+  "uid": "aigument-metrics",
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "timezone": "browser",
+  "time": { "from": "now-6h", "to": "now" },
+  "refresh": "30s",
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "JVM Heap 사용량",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "aigument-prometheus" },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "aigument-prometheus" },
+          "expr": "sum(jvm_memory_used_bytes{application=\"aigument\", area=\"heap\"})",
+          "legendFormat": "used",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "aigument-prometheus" },
+          "expr": "sum(jvm_memory_max_bytes{application=\"aigument\", area=\"heap\"})",
+          "legendFormat": "max",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "bytes" } }
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "CPU 사용률",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "aigument-prometheus" },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "aigument-prometheus" },
+          "expr": "system_cpu_usage{application=\"aigument\"}",
+          "legendFormat": "system",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "aigument-prometheus" },
+          "expr": "process_cpu_usage{application=\"aigument\"}",
+          "legendFormat": "process",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "percentunit", "max": 1, "min": 0 } }
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "HTTP 요청 처리량 (status별)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "aigument-prometheus" },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "aigument-prometheus" },
+          "expr": "sum by (status) (rate(http_server_requests_seconds_count{application=\"aigument\"}[5m]))",
+          "legendFormat": "{{status}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "reqps" } }
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "HTTP 응답 지연시간 (p95 / p99)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "aigument-prometheus" },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "aigument-prometheus" },
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(http_server_requests_seconds_bucket{application=\"aigument\"}[5m])))",
+          "legendFormat": "p95",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "aigument-prometheus" },
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(http_server_requests_seconds_bucket{application=\"aigument\"}[5m])))",
+          "legendFormat": "p99",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "s" } }
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "DB 커넥션 풀 (HikariCP)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+      "datasource": { "type": "prometheus", "uid": "aigument-prometheus" },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "aigument-prometheus" },
+          "expr": "sum(hikaricp_connections_active{application=\"aigument\"})",
+          "legendFormat": "active",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "aigument-prometheus" },
+          "expr": "sum(hikaricp_connections_idle{application=\"aigument\"})",
+          "legendFormat": "idle",
+          "refId": "B"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "aigument-prometheus" },
+          "expr": "sum(hikaricp_connections_max{application=\"aigument\"})",
+          "legendFormat": "max",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "@MeasureLatency 대상 메서드 평균 실행 시간",
+      "description": "LatencyAop가 계측하는 메서드의 평균 실행 시간 (@MeasureLatency 어노테이션이 붙은 메서드에서만 데이터 발생)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "datasource": { "type": "prometheus", "uid": "aigument-prometheus" },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "aigument-prometheus" },
+          "expr": "sum by (class, method) (rate(aigument_method_latency_seconds_sum{application=\"aigument\"}[5m])) / sum by (class, method) (rate(aigument_method_latency_seconds_count{application=\"aigument\"}[5m]))",
+          "legendFormat": "{{class}}.{{method}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "s" } }
+    }
+  ]
+}

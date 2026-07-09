@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- Spring Boot 기본 콘솔 설정 재사용 (docker logs / 로컬 콘솔 확인용) -->
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+
+    <springProperty scope="context" name="LOKI_URL" source="loki.url"/>
+    <springProperty scope="context" name="APP_NAME" source="spring.application.name" defaultValue="aigument"/>
+
+    <!--
+        Grafana Loki로 로그를 직접 전송하는 어펜더.
+        - labels: app 하나만 사용 (스트림 카디널리티를 낮게 유지)
+        - structuredMetadata: level/thread는 라벨이 아닌 메타데이터로 저장해 조회는 가능하되 스트림이 쪼개지지 않도록 함
+        - loki 컨테이너에 연결할 수 없어도 애플리케이션 자체는 정상 동작한다 (전송만 실패)
+        - test 프로파일에서는 비활성화 (loki 컨테이너가 없는 테스트 실행 환경에서 재시도 로그가 쌓이는 것을 방지)
+    -->
+    <springProfile name="!test">
+        <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
+            <labels>
+                app=${APP_NAME}
+            </labels>
+            <structuredMetadata>
+                level=%level
+                thread=%thread
+            </structuredMetadata>
+            <message>
+                <pattern>%-5level [%thread] %logger{36} - %msg%n</pattern>
+            </message>
+            <http>
+                <url>${LOKI_URL}</url>
+            </http>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="LOKI"/>
+        </root>
+    </springProfile>
+
+</configuration>

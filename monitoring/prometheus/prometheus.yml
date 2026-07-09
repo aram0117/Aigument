@@ -1,0 +1,18 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  # Spring Boot Actuator + Micrometer가 노출하는 메트릭 수집
+  - job_name: 'aigument-app'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 15s
+    static_configs:
+      - targets: [ 'app:8080' ]
+        labels:
+          application: 'aigument'
+
+  # Prometheus 자체 상태 모니터링
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: [ 'localhost:9090' ]
