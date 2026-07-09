@@ -6,11 +6,13 @@ import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
 
+import com.example.aigument.common.annotation.MeasureLatency;
 import com.example.aigument.common.infra.redis.RedisKeys;
 import com.example.aigument.common.properties.RedisProperties;
 
 @Component
 @RequiredArgsConstructor
+@MeasureLatency
 public class ChatMessageCollector {
 
     private final StringRedisTemplate redisTemplate;

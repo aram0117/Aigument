@@ -1,5 +1,6 @@
 package com.example.aigument.domain.auth.service;
 
+import com.example.aigument.common.annotation.MeasureLatency;
 import com.example.aigument.domain.auth.dto.SocialUser;
 import com.example.aigument.domain.user.entity.User;
 import com.example.aigument.domain.user.repository.UserRepository;
@@ -13,6 +14,7 @@ import static com.example.aigument.common.enums.UserRole.USER;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@MeasureLatency
 public class SocialService {
 
     private final UserRepository userRepository;

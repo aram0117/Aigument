@@ -1,5 +1,6 @@
 package com.example.aigument.domain.auth.service;
 
+import com.example.aigument.common.annotation.MeasureLatency;
 import com.example.aigument.common.exception.CustomException;
 import com.example.aigument.common.properties.JwtProperties;
 import com.example.aigument.common.security.provider.JwtProvider;
@@ -28,6 +29,7 @@ import static com.example.aigument.common.infra.redis.RedisKeys.smsAuth;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@MeasureLatency
 public class AuthService {
 
     private final UserRepository userRepository;

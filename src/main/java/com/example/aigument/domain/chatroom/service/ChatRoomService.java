@@ -1,5 +1,6 @@
 package com.example.aigument.domain.chatroom.service;
 
+import com.example.aigument.common.annotation.MeasureLatency;
 import com.example.aigument.common.exception.CustomException;
 import com.example.aigument.domain.auth.dto.AuthUser;
 import com.example.aigument.domain.chatroom.dto.event.SurrenderEvent;
@@ -27,6 +28,7 @@ import static com.example.aigument.common.exception.ErrorCode.*;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@MeasureLatency
 public class ChatRoomService {
 
     private final UserRepository userRepository;

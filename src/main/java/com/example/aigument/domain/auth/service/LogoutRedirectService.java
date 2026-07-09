@@ -1,8 +1,10 @@
 package com.example.aigument.domain.auth.service;
 
+import com.example.aigument.common.annotation.MeasureLatency;
 import org.springframework.stereotype.Service;
 
 @Service
+@MeasureLatency
 public class LogoutRedirectService {
 
     /**
