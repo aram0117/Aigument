@@ -1,0 +1,14 @@
+{
+	// 태그 소유자: tag:ci는 관리자만 기기/OAuth client에 부여할 수 있음
+	"tagOwners": {
+		"tag:ci": ["autogroup:admin"],
+	},
+
+	"acls": [
+		// 기존 사용자 기기끼리는 그대로 전체 허용 (기본 정책 유지)
+		{"action": "accept", "src": ["autogroup:member"], "dst": ["autogroup:member:*"]},
+
+		// GitHub Actions 배포 러너(tag:ci)는 배포 대상 Windows PC의 SSH(22)만 허용
+		{"action": "accept", "src": ["tag:ci"], "dst": ["100.118.112.64:22"]},
+	],
+}

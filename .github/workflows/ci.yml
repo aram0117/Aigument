@@ -1,0 +1,123 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  # PR 검증은 최신 push만 남기고 취소해도 되지만, main 배포(push 이벤트)는 도중에 취소되면
+  # 컨테이너 재기동이 중간에 끊길 수 있어 취소하지 않고 순차 대기시킨다.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build-and-test:
+    name: Build & Test (App Health Check)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # compileJava/compileTestJava, test, jacocoTestCoverageVerification(라인 커버리지 70%)까지
+      # build.gradle의 check 태스크에 묶여 있어 build 한 번으로 전반적인 앱 헬스 체크를 수행한다.
+      - name: Build & run all checks (compile, test, coverage verification)
+        run: ./gradlew build --no-daemon
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report
+          path: build/reports/tests/test
+          retention-days: 7
+
+      - name: Upload jacoco coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: build/reports/jacoco/test
+          retention-days: 7
+
+  deploy:
+    name: Deploy (Rebuild App Image & Container)
+    needs: build-and-test
+    # main에 실제로 머지(=push)된 경우에만 배포. PR 검증 단계에서는 실행하지 않는다.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # 배포 대상(Windows PC)에 직접 설치한 셀프 호스팅 러너에서 실행 -> 네트워크 도달성 문제 자체가 없어
+    # Tailscale/SSH 키 없이 로컬 셸에서 바로 git 동기화 -> app 이미지(내부에서 jar 빌드 포함) 재빌드 -> 컨테이너 재기동.
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # 기본값(clean: true)은 `git clean -ffdx`를 실행해 .env, mysql_data, redis_data,
+          # ollama/model, nginx ssl 인증서 등 서버에만 존재하는 미추적 파일을 모두 삭제한다.
+          # 배포 서버에서는 이 파일들이 지워지면 안 되므로 clean을 비활성화한다.
+          clean: false
+
+      # Dockerfile이 멀티스테이지 빌드로 jar 생성까지 포함하므로,
+      # 호스트에서 별도로 gradlew를 실행할 필요 없이 이미지 빌드 한 번으로 끝난다.
+      - name: Rebuild app docker image
+        run: docker compose build app
+
+      # 치명적 취약점(CRITICAL)이 있는 이미지는 컨테이너 재기동 전에 여기서 막는다.
+      - name: Scan app image for vulnerabilities
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: aigument-app:latest
+          format: table
+          severity: CRITICAL
+          exit-code: '1'
+
+      - name: Recreate app container
+        run: docker compose up -d --no-deps app
+
+      # 컨테이너 기동 명령 자체가 성공해도 앱이 뜨자마자 죽었을 수 있으므로,
+      # 실제로 응답 가능한 상태인지 actuator health 엔드포인트로 확인한다.
+      - name: Wait for app health check
+        shell: powershell
+        run: |
+          $maxRetries = 20
+          $delaySeconds = 3
+          for ($i = 1; $i -le $maxRetries; $i++) {
+            try {
+              $response = Invoke-WebRequest -Uri "http://localhost:8080/actuator/health" -UseBasicParsing -TimeoutSec 5
+              if ($response.StatusCode -eq 200) {
+                Write-Host "Health check passed (attempt $i/$maxRetries)"
+                exit 0
+              }
+            } catch {
+              Write-Host "Health check attempt $i/$maxRetries failed, retrying in $delaySeconds s..."
+            }
+            Start-Sleep -Seconds $delaySeconds
+          }
+          Write-Error "App did not become healthy after $maxRetries attempts"
+          exit 1
+
+      - name: Clean up dangling images
+        run: docker image prune -f
+
+      # 위 스텝 중 하나라도 실패했을 때만 실행되어 배포 실패를 알린다.
+      - name: Notify deploy failure on Discord
+        if: failure()
+        shell: powershell
+        run: |
+          $payload = @{ content = "🚨 [Aigument] main 배포 실패: ${{ github.sha }} (${{ github.actor }}) - ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" } | ConvertTo-Json
+          Invoke-RestMethod -Uri "${{ secrets.DISCORD_WEBHOOK_URL }}" -Method Post -ContentType "application/json" -Body $payload
