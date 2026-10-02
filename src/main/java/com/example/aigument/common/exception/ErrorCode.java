@@ -32,7 +32,7 @@ public enum ErrorCode {
     NOT_FOUND_USER_IN_CHATROOM(HttpStatus.FORBIDDEN, "채팅방 내에서 사용자를 찾을 수 없습니다."),
 
     // ai
-    EMPTY_CHAT_LOG(HttpStatus.BAD_REQUEST, "채팅 기록이 비어 있어 분석을 진행할 수 없습니다."),
+    EMPTY_CHAT_SUMMARY(HttpStatus.BAD_REQUEST, "분석할 채팅 요약 기록이 없어 분석을 진행할 수 없습니다."),
     AI_HALLUCINATED_PARTICIPANT(HttpStatus.INTERNAL_SERVER_ERROR, "AI 분석 결과에 현재 채팅방에 존재하지 않는 사용자가 포함되어 있습니다."),
 
 

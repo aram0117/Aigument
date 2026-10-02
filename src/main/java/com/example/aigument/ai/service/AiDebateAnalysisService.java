@@ -17,8 +17,9 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
-import static com.example.aigument.common.exception.ErrorCode.EMPTY_CHAT_LOG;
+import static com.example.aigument.common.exception.ErrorCode.EMPTY_CHAT_SUMMARY;
 import static com.example.aigument.common.exception.ErrorCode.NOT_FOUND_CHATROOM;
 
 @Slf4j
@@ -42,33 +43,72 @@ public class AiDebateAnalysisService {
                 .orElseThrow(() -> new CustomException(NOT_FOUND_CHATROOM));
 
         Long foundChatRoomId = foundChatRoom.getId();
-        String logKey = RedisKeys.chatRoomLog(foundChatRoomId);
+        String summeryLogKey = RedisKeys.chatSummaryLog(foundChatRoomId);
         String topicChannel = RedisKeys.chatRoomTopic(foundChatRoomId);
 
         redissonClient.getTopic(topicChannel).publish(ANALYZING);
 
-        List<String> messages = redisTemplate.opsForList().range(logKey, 0, -1);
+        String finalSummery = redisTemplate.opsForValue().get(summeryLogKey);
 
-        if (messages == null || messages.isEmpty()) {
-            throw new CustomException(EMPTY_CHAT_LOG);
+        if (finalSummery == null || finalSummery.isBlank()) {
+            throw new CustomException(EMPTY_CHAT_SUMMARY);
         }
 
-        String prompt = String.join("\n", messages);
+        String prompt = String.format(
+                       """
+                        [요구사항]
+                        최종 요약본을 확인하여 최종 승리 유저와 패배 유저를 판정하고 그 이유를 분석해줘
+                       
+                       \s
+                        [최종 요약본]\s
+                        %s
+                       \s""", finalSummery);
 
         log.info("[AiDebateAnalysisService] 토론 분석 시작 - ChatRoomId: {}", chatRoomId);
 
         Timer.Sample sample = Timer.start(meterRegistry);
 
-        ollamaAi.askOllama3(prompt)
+        ollamaAi.askOllama3(prompt, "analyze")
                 .subscribe(
                         result -> {
-                            handleAiSuccess(result, foundChatRoom, topicChannel, logKey);
+                            handleAiSuccess(result, foundChatRoom, topicChannel, summeryLogKey);
                             recordAnalysisLatency(sample, "success");
                         },
                         error -> {
                             handleAiGlobalError(topicChannel);
                             recordAnalysisLatency(sample, "error");
                         }
+                );
+    }
+
+    // 채팅 분기별 ai 요약
+    public void summarizeChatBranch(Long chatRoomId, List<String> messages) {
+
+        String logKey = RedisKeys.chatSummaryLog(chatRoomId);
+
+        // 요약본이 존재하지 않으면 빈 문자열 반환
+        String chatSummery = Objects.requireNonNullElse(redisTemplate.opsForValue().get(logKey), "");
+
+        String prompt = String.format(
+                """
+                 [요구사항]
+                 아래 [이전 요약]과 [새 채팅 메시지]의 내용을 모두 반영하여, 지금까지의 토론 흐름을 빠짐없이 요약해줘.
+                 이후 이 요약본만으로 최종 승패를 판정할 것이므로 발언자(유저ID)와 핵심 주장은 유지해줘.
+
+                 [이전 요약]
+                 %s
+
+                 [새 채팅 메시지]
+                 %s
+                """,
+                chatSummery.isBlank() ? "(없음)" : chatSummery,
+                String.join("\n", messages)
+        );
+
+        ollamaAi.askOllama3(prompt, "summarize")
+                .subscribe(
+                        result -> redisTemplate.opsForValue().set(logKey, result), // 최신 요약본 갱신
+                        error -> log.error("[AiDebateAnalysisService] 채팅 분기 요약 최종 실패 - ChatRoomId: {}, 원인: {}", chatRoomId, error.getMessage())
                 );
     }
 
@@ -80,8 +120,7 @@ public class AiDebateAnalysisService {
     }
 
 
-    private void handleAiSuccess(String result, ChatRoom chatRoom, String topicChannel, String logKey) {
-
+    private void handleAiSuccess(String result, ChatRoom chatRoom, String topicChannel, String summeryLogKey) {
         try {
             OllamaJudgementResult judgement = objectMapper.readValue(result, OllamaJudgementResult.class);
 
@@ -101,10 +140,11 @@ public class AiDebateAnalysisService {
             redissonClient.getTopic(topicChannel).publish(msg);
             log.info("[AiDebateAnalysisService] 분석 완료 퍼블리싱 성공 - Channel: {}", topicChannel);
 
-            redisTemplate.delete(logKey);
+
+            redisTemplate.delete(summeryLogKey);
 
         } catch (CustomException e) {
-            log.error("[AiDebateAnalysisService] AI 응답 성공 처리중 예상치 못한 에러 (상세 사유 : {}", e.getMessage());
+            log.error("[AiDebateAnalysisService] AI 응답 성공 처리중 예상치 못한 에러 (상세 사유 : {})", e.getMessage());
             handleAiGlobalError(topicChannel);
         } catch (Exception e) {
             log.error("[AiDebateAnalysisService] AI 규격 에러 (예상 응답 형식 - {\"winner\": \"유저ID\", \"loser\": \"유저ID\", \"reason\": \"승리 이유 요약\"}) \n 원본 응답: {}", result, e);
