@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'jacoco'
     id 'org.springframework.boot' version '3.4.0'
     id 'io.spring.dependency-management' version '1.1.7'
 }
@@ -31,6 +32,11 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-aop'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
+    // monitoring (Prometheus 메트릭 + Loki 로그 전송)
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+    implementation 'com.github.loki4j:loki-logback-appender:2.0.3'
+
     // redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.redisson:redisson:4.1.0'
@@ -57,6 +63,7 @@ dependencies {
     // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     // docs
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5'
@@ -70,4 +77,64 @@ dependencyManagement {
 
 tasks.named('test') {
     useJUnitPlatform()
+    finalizedBy jacocoTestReport
+    // Loki 어펜더 등 test 프로파일에서 비활성화해야 하는 설정을 위해 활성 프로파일 지정
+    systemProperty 'spring.profiles.active', 'test'
 }
+
+jacoco {
+    toolVersion = '0.8.12'
+}
+
+// 커버리지 리포트에서 제외할 대상
+// - 설정/보안/웹소켓/문서/sms 등 인프라성 코드 (직접 로직 테스트 대상이 아님)
+// - 부트스트랩 클래스, 순수 데이터 보관용 request DTO
+def coverageExcludes = [
+        'com/example/aigument/AigumentApplication.class',
+        'com/example/aigument/common/aop/**',
+        'com/example/aigument/common/annotation/**',
+        'com/example/aigument/common/config/**',
+        'com/example/aigument/common/docs/**',
+        'com/example/aigument/common/security/**',
+        'com/example/aigument/common/infra/websocket/**',
+        'com/example/aigument/common/infra/sms/**',
+        'com/example/aigument/common/valid/**',
+        '**/dto/request/**',
+        '**/*Request.class'
+]
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+        html.required = true
+    }
+    afterEvaluate {
+        classDirectories.setFrom(
+                files(classDirectories.files.collect {
+                    fileTree(dir: it, excludes: coverageExcludes)
+                })
+        )
+    }
+}
+
+jacocoTestCoverageVerification {
+    dependsOn test
+    afterEvaluate {
+        classDirectories.setFrom(
+                files(classDirectories.files.collect {
+                    fileTree(dir: it, excludes: coverageExcludes)
+                })
+        )
+    }
+    violationRules {
+        rule {
+            limit {
+                counter = 'LINE'
+                minimum = 0.70
+            }
+        }
+    }
+}
+
+check.dependsOn jacocoTestCoverageVerification

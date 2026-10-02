@@ -67,6 +67,12 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
                         ).permitAll()
+                        // 모니터링: 컨테이너 헬스체크 및 Prometheus 스크래핑용 (내부 네트워크에서만 접근)
+                        .requestMatchers(
+                                "/actuator/health/**",
+                                "/actuator/prometheus",
+                                "/actuator/info"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
 
