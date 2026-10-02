@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -35,6 +36,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(CommonResponse.error(message));
+    }
+
+    // 필수 요청 헤더 누락 예외 처리 (예: Authorization 헤더 없이 로그아웃 요청)
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    public ResponseEntity<CommonResponse<Void>> missingRequestHeaderException(MissingRequestHeaderException e) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(CommonResponse.error(e.getHeaderName() + " 헤더는 필수입니다."));
     }
 
     // 예상하지 못한 예외 처리 (500 Internal Server Error)
